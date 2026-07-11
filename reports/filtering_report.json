@@ -1,0 +1,18 @@
+{
+  "input_records": 800,
+  "drops": {
+    "schema": 0,
+    "consistency": 11,
+    "near_duplicate": 0
+  },
+  "dedup_method": "jaccard",
+  "cross_split_leaks": 0,
+  "splits": {
+    "train": 568,
+    "dev": 78,
+    "test": 53,
+    "gold_test": 60,
+    "agreement_pool": 30
+  },
+  "total_dropped": 11
+}

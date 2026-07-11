@@ -1,0 +1,13 @@
+{
+  "billed_calls": 1000,
+  "cache_hits": 600,
+  "input_tokens": 2541708,
+  "output_tokens": 181810,
+  "avg_input_tokens_per_call": 2541.7,
+  "avg_output_tokens_per_call": 181.8,
+  "total_usd": 0.0,
+  "usd_per_1k_calls": 0.0,
+  "n_seeds": 800,
+  "n_valid": 800,
+  "schema_valid_rate_teacher": 1.0
+}

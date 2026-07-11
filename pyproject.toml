@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "distil_task"
+version = "0.1.0"
+description = "Task-distilled small model: invoice/receipt structured extraction (frontier teacher -> Qwen2.5-3B student)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ali Hamza" }]
+dependencies = [
+    "pydantic>=2.5",
+    "jsonschema>=4.20",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# API-only data generation (runs on a laptop, no GPU needed)
+datagen = [
+    "anthropic>=0.40",
+]
+# Full GPU training/eval stack (RTX 5080 machine)
+gpu = [
+    "torch>=2.6",
+    "transformers>=4.46",
+    "datasets>=2.20",
+    "trl>=0.12",
+    "peft>=0.13",
+    "unsloth",
+    "sentence-transformers>=3.0",
+    "wandb",
+    "streamlit>=1.38",
+]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,99 @@
+# =====================================================================
+# Task-Distilled Small Model — single source of configuration.
+# All paths are relative to the project root (the directory holding
+# pyproject.toml); scripts resolve them via distil_task.config.
+# =====================================================================
+
+task:
+  name: invoice_extraction
+  # Phase 0 commitment (locked): metric M = field-level F1 on the
+  # human-verified gold test set; student must reach >= 95% of teacher.
+  metric: field_f1
+  quality_bar_ratio: 0.95
+
+paths:
+  raw_dir: data/raw
+  cache_dir: data/cache
+  seeds_file: data/seeds/seeds.jsonl
+  labeled_file: data/labeled/labeled.jsonl
+  consistency_file: data/labeled/labeled_second_pass.jsonl
+  splits_dir: data/splits
+  gold_dir: data/gold
+  reports_dir: reports
+  student_dir: models/student
+  merged_dir: models/student-merged
+
+teacher:
+  provider: local_openai         # local_openai (Ollama) | anthropic | (extend TeacherClient)
+  model: qwen3:14b               # local open teacher via Ollama (/api/chat, think:false)
+  temperature: 0.0               # deterministic labeling pass
+  consistency_temperature: 0.7   # second pass for self-consistency check
+  max_tokens: 2048
+  max_retries: 5
+  backoff_base_s: 2.0
+  # Price table, USD per million tokens. Keyed by model id (prefix-matched) so
+  # cost accounting survives a model switch. Local models bill $0 tokens — the
+  # honest cost story is the GPU-amortization model in the `cost:` section.
+  price_table:
+    qwen:                   { input_per_mtok: 0.00,  output_per_mtok: 0.00 }
+    claude-sonnet-4-5:      { input_per_mtok: 3.00,  output_per_mtok: 15.00 }
+    claude-opus-4-6:        { input_per_mtok: 15.00, output_per_mtok: 75.00 }
+    claude-haiku-4-5:       { input_per_mtok: 1.00,  output_per_mtok: 5.00 }
+
+generation:
+  n_seeds: 3000                  # synthetic invoice texts to generate
+  seeds_per_call: 10             # invoices per teacher call (batched in one response)
+  seed_temperature: 1.0          # diversity matters more than determinism here
+
+filtering:
+  dedup_method: auto             # auto -> embeddings if available, else jaccard
+  dedup_threshold: 0.90          # cosine / jaccard similarity above which = near-dup
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  consistency_enabled: true
+  consistency_threshold: 0.85    # min field-level agreement between two teacher runs
+  money_abs_tol: 0.01            # cents-level tolerance on money comparisons
+
+splits:
+  train_ratio: 0.72
+  dev_ratio: 0.10
+  test_ratio: 0.18              # larger test pool so gold + agreement + test are all non-empty at this dataset size
+  gold_size: 60                # carved from test pool -> human verification (scaled to the ~800-seed set)
+  agreement_pool_size: 30      # fresh unseen inputs for teacher-agreement eval
+  seed: 20260707
+
+training:
+  base_model: Qwen/Qwen2.5-0.5B-Instruct    # 0.5B student: full-FT fits 16 GB, tiny+fast (3B download unreliable on this link)
+  smoke_model: Qwen/Qwen2.5-0.5B-Instruct   # tiny model for --smoke runs
+  max_seq_length: 2048
+  full_finetune: true            # 0.5B full FT fits 16 GB easily (a 3B full FT would need ~36 GB)
+  lora_r: 16                     # used only if full_finetune: false
+  lora_alpha: 16
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-5
+  num_train_epochs: 3
+  warmup_ratio: 0.03
+  weight_decay: 0.01
+  logging_steps: 20
+  eval_steps: 200
+  save_steps: 200
+  bf16: true
+  gradient_checkpointing: true
+  report_to: none                # wandb | tensorboard | none
+  wandb_project: task-distilled-small-model
+
+inference:
+  max_new_tokens: 1024
+  max_retries: 3                 # constrained-output retry loop in serve/infer.py
+
+cost:
+  # Student amortization model (honest: GPU capex + electricity, not "free").
+  gpu_price_usd: 1100.0          # RTX 5080 street price
+  gpu_lifetime_years: 3.0
+  gpu_utilization: 1.0           # fraction of amortization attributed to this workload
+  gpu_power_watts: 360.0         # board power under inference load
+  electricity_usd_per_kwh: 0.15
+  student_throughput_rps: 4.0    # requests/second measured by scripts/evaluate.py
+  # Teacher per-request token profile (measured averages overwrite these)
+  teacher_avg_input_tokens: 900
+  teacher_avg_output_tokens: 350

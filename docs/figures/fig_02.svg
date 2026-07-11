@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1138 294" font-family="Segoe UI, Arial, sans-serif">
+<rect x="0" y="0" width="1138" height="294" fill="#FFFFFF"/>
+<text x="30" y="42" font-size="22" font-weight="700" fill="#2C2C2A">02 · Task distillation</text>
+<text x="30" y="66" font-size="14" fill="#5F5E5A">invoice -&gt; JSON, Qwen student</text>
+<rect x="30" y="92" width="244" height="168" rx="10" fill="#FCEBEB" stroke="#A32D2D" stroke-width="1.5"/>
+<text x="46" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#A32D2D" letter-spacing="0.5">PROBLEM</text>
+<text x="46" y="144" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#501313">Frontier extraction is</text>
+<text x="46" y="164" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#501313">costly + remote;</text>
+<text x="46" y="184" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#501313">no Claude API key</text>
+<text x="46" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#501313">available</text>
+<path d="M 280 176.0 l 22 0 m -7 -6 l 7 6 l -7 6" fill="none" stroke="#5F5E5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="308" y="92" width="244" height="168" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-width="1.5"/>
+<text x="324" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#854F0B" letter-spacing="0.5">DIAGNOSIS</text>
+<text x="324" y="144" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#412402">16 GB can't full-FT</text>
+<text x="324" y="164" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#412402">a 3B; 3B &amp; 1.5B</text>
+<text x="324" y="184" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#412402">downloads stall on</text>
+<text x="324" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#412402">the flaky link</text>
+<path d="M 558 176.0 l 22 0 m -7 -6 l 7 6 l -7 6" fill="none" stroke="#5F5E5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="586" y="92" width="244" height="168" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="1.5"/>
+<text x="602" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#185FA5" letter-spacing="0.5">SOLUTION</text>
+<text x="602" y="144" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#042C53">Local qwen3:14b labels</text>
+<text x="602" y="164" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#042C53">800 seeds at 100%</text>
+<text x="602" y="184" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#042C53">schema-valid; full-FT</text>
+<text x="602" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#042C53">Qwen2.5-0.5B (631 train)</text>
+<path d="M 836 176.0 l 22 0 m -7 -6 l 7 6 l -7 6" fill="none" stroke="#5F5E5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="864" y="92" width="244" height="168" rx="10" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1.5"/>
+<text x="880" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#3B6D11" letter-spacing="0.5">RESULT</text>
+<text x="880" y="144" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#173404">field-F1 0.913</text>
+<text x="880" y="170" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#173404">82% -&gt; 91% with 2.7x</text>
+<text x="880" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#173404">data; schema-valid 96.7%</text>
+<text x="880" y="210" font-family="Segoe UI, Arial, sans-serif" font-size="13.5" fill="#173404">~28x smaller than teacher</text>
+</svg>

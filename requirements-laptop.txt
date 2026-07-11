@@ -1,0 +1,11 @@
+# Minimal pure-Python subset: enough to run data generation (Phase 1,
+# scripts/00..02 -- teacher API only, no GPU) and the local test suite
+# on a laptop with no CUDA and little disk.
+#
+# pip install -r requirements-laptop.txt
+pydantic>=2.5
+jsonschema>=4.20
+pyyaml>=6.0
+anthropic>=0.40
+# local_openai teacher provider (Ollama /v1) uses only the stdlib (urllib) — no SDK needed
+pytest>=8.0

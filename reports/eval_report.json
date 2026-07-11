@@ -1,0 +1,50 @@
+{
+  "model_dir": "C:\\Users\\alihamza\\Downloads\\projects\\New folder (3)\\02-task-distilled-small-model\\models\\student",
+  "n_gold": 60,
+  "n_unverified_excluded": 0,
+  "n_unverified_scored": 60,
+  "allow_unverified_gold": true,
+  "gold_grade": "DEV_ONLY_teacher_labeled",
+  "quality": {
+    "n": 60.0,
+    "field_f1": 0.9127198045391495,
+    "field_f1_micro": 0.9304666056724611,
+    "field_precision": 0.9133414051607501,
+    "field_recall": 0.9133414051607501,
+    "exact_match": 0.4166666666666667,
+    "schema_valid_rate": 0.9666666666666667
+  },
+  "teacher_quality": {
+    "n": 60.0,
+    "field_f1": 1.0,
+    "field_f1_micro": 1.0,
+    "field_precision": 1.0,
+    "field_recall": 1.0,
+    "exact_match": 1.0,
+    "schema_valid_rate": 1.0
+  },
+  "metric": "field_f1",
+  "quality_bar_ratio": 0.95,
+  "student_over_teacher_ratio": 0.9127,
+  "meets_bar": false,
+  "teacher_agreement": 0.9351911178913467,
+  "latency_s": {
+    "p50": 4.0235,
+    "p95": 7.1603
+  },
+  "throughput_rps": 0.213,
+  "cost": {
+    "teacher_usd_per_1k": 0.0,
+    "student_usd_per_1k": 0.1248,
+    "cost_multiple": 0.0,
+    "break_even_requests_per_day": null,
+    "assumptions": {
+      "teacher_avg_input_tokens": 900.0,
+      "teacher_avg_output_tokens": 350.0,
+      "gpu_price_usd": 1100.0,
+      "gpu_power_watts": 360.0,
+      "electricity_usd_per_kwh": 0.15,
+      "measured_throughput_rps": 0.213
+    }
+  }
+}

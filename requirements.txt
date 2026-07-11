@@ -1,0 +1,28 @@
+# Full stack for the RTX 5080 training/eval machine.
+# NOTE: install torch FIRST with the correct CUDA wheel for your driver
+# (RTX 5080 is Blackwell / sm_120 -> needs torch built for cu128; see RUNBOOK.md),
+# then install the rest so pip does not pull a CPU-only torch.
+
+# --- core / schema / data ---
+pydantic>=2.5
+jsonschema>=4.20
+pyyaml>=6.0
+datasets>=2.20
+
+# --- teacher API ---
+anthropic>=0.40
+
+# --- training ---
+torch>=2.6
+transformers>=4.46
+trl>=0.12
+peft>=0.13
+unsloth
+sentence-transformers>=3.0
+
+# --- tracking / dashboard ---
+wandb
+streamlit>=1.38
+
+# --- tests ---
+pytest>=8.0
