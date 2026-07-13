@@ -56,6 +56,20 @@ Start with the SPEC, then read the docs in order.
 - [docs/09-references.md](docs/09-references.md) — Papers, benchmarks, models, datasets, tools from the SPEC.
 - [docs/10-glossary.md](docs/10-glossary.md) — Every domain term, one clear sentence each.
 
+## Phase 2 / v2.0 (planned)
+
+A next-phase documentation suite plans four upgrades that make the whole
+cost-arbitrage thesis land: (1) a **paid frontier teacher** (or a real API priced
+into the cost model) to finally prove the signature $/1k win + break-even volume —
+the entire point of the project, unprovable with the free local teacher, (2) a
+**human-verified gold set** (silver → gold, with an adjudication protocol) removing
+the cross-model circularity, (3) **scaling the student to the SPEC's 1–3B band**
+with a clean capacity-vs-data ablation, and (4) a **working one-command `ollama
+run`** via a valid llama.cpp GGUF. It is a **plan, not yet built** — every v2.0
+number is a target anchored on the measured v1.0 baseline (student field-F1 0.9647 =
+96.5% of teacher, 100% schema-valid, 118 tests). See
+[docs/phase-2/README.md](docs/phase-2/README.md).
+
 ## Tech stack (compact)
 
 **Teacher:** frontier API model or a strong open model (e.g., a 70B) · **Student base:** Qwen2.5-1.5B/3B, Llama-3.2-1B/3B, Phi-3.5-mini, Gemma-2-2B · **Fine-tuning:** Unsloth or TRL `SFTTrainer` + PEFT · **Serving:** Ollama / llama.cpp / vLLM / TGI · **Data:** `datasets`, `pydantic`, `jsonschema` · **Eval:** `lm-evaluation-harness`, promptfoo / Braintrust · **Tracking:** W&B / TensorBoard · **Hardware:** single RTX 5080 (16GB).
