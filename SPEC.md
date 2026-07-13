@@ -20,7 +20,7 @@
 - Classification/triage (support ticket routing, intent detection, PII flagging).
 - Query rewriting / SQL generation for a fixed schema.
 - Domain summarization (e.g., legal clause summaries) with a fixed format.
-- **Tie it to Cytrom:** a task one of your clients actually pays per-API-call for.
+- **Tie it to a client:** a task one of your clients actually pays per-API-call for.
 
 ---
 
@@ -211,4 +211,4 @@ Model on HF, eval report, cost dashboard, Ollama one-liner to run it, blog post.
 - Candidate bases: Qwen2.5-1.5B/3B, Llama-3.2-1B/3B, Phi-3.5-mini, Gemma-2-2B.
 
 ---
-*Fits your stack: pairs naturally with your Ollama/local-inference setup and gives clients a privacy-preserving, cheap alternative to frontier APIs. Strong Cytrom sales artifact.*
+*Fits your stack: pairs naturally with your Ollama/local-inference setup and gives clients a privacy-preserving, cheap alternative to frontier APIs. Strong client sales artifact.*

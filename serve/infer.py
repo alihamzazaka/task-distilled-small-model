@@ -102,6 +102,7 @@ class Backend:
         *,
         temperature: float = 0.0,
         max_new_tokens: Optional[int] = None,
+        constrained: Optional[bool] = None,
     ) -> str:
         raise NotImplementedError
 
@@ -122,6 +123,7 @@ class FunctionBackend(Backend):
         *,
         temperature: float = 0.0,
         max_new_tokens: Optional[int] = None,
+        constrained: Optional[bool] = None,
     ) -> str:
         return self._fn(messages, temperature)
 
@@ -140,11 +142,22 @@ class TransformersBackend(Backend):
         max_new_tokens: int = 1024,
         device: Optional[str] = None,
         dtype: str = "auto",
+        constrained: bool = False,
     ) -> None:
         self.model_dir = str(model_dir)
         self.default_max_new_tokens = int(max_new_tokens)
         self.device = device
         self.dtype = dtype
+        # Schema-constrained decoding forces the student to emit only tokens that
+        # keep the output a valid prefix of a schema-conforming Invoice JSON.
+        # MEASURED: applying it to EVERY generation hurts this 0.5B student
+        # (field-F1 0.913 -> 0.855) because the grammar pushes it off its natural
+        # distribution. So the default is OFF (free generation = best content),
+        # and the StructuredExtractor turns it ON only for repair retries, where
+        # guaranteeing structure rescues an otherwise-failed extraction.
+        self.constrained = bool(constrained)  # default for generate() when not overridden
+        self._prefix_fn: Any = None
+        self._prefix_unavailable: bool = False
         self._model: Any = None
         self._tok: Any = None
         self._torch: Any = None
@@ -177,12 +190,72 @@ class TransformersBackend(Backend):
         self._tok = tok
         self._model = model
 
+    def _ensure_prefix_fn(self) -> bool:
+        """Lazily build the JSON-schema token-constraint function (cached).
+
+        Returns True if constrained decoding is available. Built on demand so
+        the DEFAULT (free) path pays nothing; the extractor only asks for the
+        constraint on a repair retry, where guaranteeing structure is worth the
+        small content cost that full-constraint imposes on this 0.5B student.
+        """
+        if self._prefix_fn is not None:
+            return True
+        if self._prefix_unavailable:
+            return False
+        try:
+            import functools  # noqa: PLC0415
+
+            from lmformatenforcer import (  # noqa: PLC0415
+                JsonSchemaParser, TokenEnforcer, TokenEnforcerTokenizerData,
+            )
+
+            from distil_task.schema import Invoice  # noqa: PLC0415
+
+            tok = self._tok
+            # lm-format-enforcer's packaged HF integration imports
+            # PreTrainedTokenizerBase from a module path that moved in
+            # transformers 5.x, so build the tokenizer data from the core API
+            # directly (version-independent).
+            def _regular_tokens(tk, vocab_size):
+                token_0 = tk.encode("0")[-1]
+                special = set(tk.all_special_ids)
+                out = []
+                for tid in range(vocab_size):
+                    if tid in special:
+                        continue
+                    after0 = tk.decode([token_0, tid])[1:]
+                    regular = tk.decode([tid])
+                    out.append((tid, after0, len(after0) > len(regular)))
+                return out
+
+            def _decode(tk, toks):
+                return tk.decode(toks).rstrip("�")
+
+            vsz = len(tok)
+            tok_data = TokenEnforcerTokenizerData(
+                _regular_tokens(tok, vsz), functools.partial(_decode, tok),
+                tok.eos_token_id, False, vsz,
+            )
+            enforcer = TokenEnforcer(tok_data, JsonSchemaParser(Invoice.model_json_schema()))
+
+            def _prefix_fn(batch_id, sent):
+                return enforcer.get_allowed_tokens(sent.tolist()).allowed_tokens
+
+            self._prefix_fn = _prefix_fn
+            return True
+        except Exception as e:  # noqa: BLE001 - never let constraint setup break generation
+            print(f"[infer] schema-constrained decoding unavailable ({type(e).__name__}: {e}); "
+                  "using free generation.")
+            self._prefix_unavailable = True
+            return False
+
     def generate(
         self,
         messages: Sequence[Message],
         *,
         temperature: float = 0.0,
         max_new_tokens: Optional[int] = None,
+        constrained: Optional[bool] = None,
     ) -> str:
         self._ensure_loaded()
         torch = self._torch
@@ -210,6 +283,11 @@ class TransformersBackend(Backend):
         }
         if do_sample:
             gen_kwargs["temperature"] = float(temperature)
+        # Constrain the token stream to the Invoice JSON grammar when requested
+        # (per-call override falls back to the instance default).
+        want_constraint = self.constrained if constrained is None else bool(constrained)
+        if want_constraint and self._ensure_prefix_fn():
+            gen_kwargs["prefix_allowed_tokens_fn"] = self._prefix_fn
 
         with torch.no_grad():
             out = self._model.generate(prompt_ids, **gen_kwargs)
@@ -288,13 +366,17 @@ class StructuredExtractor:
 
         total_attempts = self.max_retries + 1
         for attempt in range(1, total_attempts + 1):
-            # first pass deterministic; retries add a little temperature to
-            # escape a repeated bad generation.
+            # First pass: deterministic FREE generation (best content). Retries:
+            # add a little temperature to escape a repeated bad generation AND
+            # constrain to the JSON-schema grammar so the repair is guaranteed
+            # structurally valid (rescues the ~3% the free pass gets wrong,
+            # without the content cost of constraining the other 97%).
             temperature = 0.0 if attempt == 1 else self.retry_temperature
             raw = self.backend.generate(
                 messages,
                 temperature=temperature,
                 max_new_tokens=self.max_new_tokens,
+                constrained=(attempt > 1),
             )
             last_raw = raw
             inv, err = self._parse_and_validate(raw)

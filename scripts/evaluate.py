@@ -70,6 +70,9 @@ def main() -> int:
     ap.add_argument("--allow-unverified-gold", action="store_true",
                     help="score ALL gold records even if human_verified is false "
                          "(dev only — the headline number requires verification)")
+    ap.add_argument("--silver-only", action="store_true",
+                    help="score only SILVER-verified gold (cross-model agreement, see "
+                         "scripts/03_silver_verify.py) — a mid grade between dev and human-gold")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -79,13 +82,24 @@ def main() -> int:
 
     # ---- load eval sets -----------------------------------------------------
     gold_all = read_jsonl(resolve_path(cfg, "gold_dir") / "gold_test.jsonl")
-    gold = [r for r in gold_all if r.get("human_verified") or args.allow_unverified_gold]
+    if args.silver_only:
+        gold = [r for r in gold_all if r.get("silver_verified")]
+        if not gold:
+            print("[error] no silver-verified gold — run scripts/03_silver_verify.py first "
+                  "(or drop --silver-only).")
+            return 1
+        gold_grade = "SILVER (cross-model agreement)"
+        print(f"[silver] scoring {len(gold)}/{len(gold_all)} SILVER-verified gold records "
+              f"(model: {gold[0].get('silver_model', '?')})")
+    else:
+        gold = [r for r in gold_all if r.get("human_verified") or args.allow_unverified_gold]
+        gold_grade = "human_verified" if all(r.get("human_verified") for r in gold_all) else "DEV_ONLY_teacher_labeled"
     unverified = len(gold_all) - sum(1 for r in gold_all if r.get("human_verified"))
     if not gold:
         print("[error] no usable gold records — hand-verify data/gold/gold_test.jsonl first "
               "(or pass --allow-unverified-gold for a dev run)")
         return 1
-    if unverified and args.allow_unverified_gold:
+    if unverified and args.allow_unverified_gold and not args.silver_only:
         print(f"[WARN] scoring {unverified} UNVERIFIED gold records — not a headline number")
 
     pool = read_jsonl(resolve_path(cfg, "splits_dir") / "agreement_pool.jsonl")
@@ -155,7 +169,7 @@ def main() -> int:
         "n_unverified_excluded": 0 if args.allow_unverified_gold else unverified,
         "n_unverified_scored": unverified if args.allow_unverified_gold else 0,
         "allow_unverified_gold": bool(args.allow_unverified_gold),
-        "gold_grade": ("human_verified" if unverified == 0 else "DEV_ONLY_teacher_labeled"),
+        "gold_grade": gold_grade,
         "quality": quality,
         "teacher_quality": teacher_quality,
         "metric": metric_name,
@@ -200,14 +214,24 @@ def main() -> int:
     teacher_model = cfg['teacher']['model']
     student_model = cfg['training']['base_model']
     teacher_local = (t_1k <= 0.0)
-    gold_caveat = (
-        "" if unverified == 0 else
-        f"\n> **⚠ Dev-grade numbers:** all {unverified} gold records are teacher-labeled "
-        f"(`human_verified: false`) — the quality row is student-vs-teacher agreement, "
-        f"not human-verified ground truth. The teacher reference of "
-        f"{'{:.4f}'.format(teacher_m)} is 1.0 **by construction** on unverified gold. "
-        f"Hand-verify `data/gold/gold_test.jsonl` before quoting these as headline numbers.\n"
-    )
+    if args.silver_only:
+        gold_caveat = (
+            f"\n> **Silver-grade numbers:** scored on the {len(gold)} gold items where "
+            f"an INDEPENDENT second model ({gold[0].get('silver_model', '?')}) agreed with the "
+            f"teacher's label (cross-model agreement removes the teacher-vs-itself circularity). "
+            f"This is stronger than dev-grade but not yet human-verified.\n"
+        )
+    elif unverified == 0:
+        gold_caveat = ""
+    else:
+        gold_caveat = (
+            f"\n> **⚠ Dev-grade numbers:** all {unverified} gold records are teacher-labeled "
+            f"(`human_verified: false`) — the quality row is student-vs-teacher agreement, "
+            f"not human-verified ground truth. The teacher reference of "
+            f"{'{:.4f}'.format(teacher_m)} is 1.0 **by construction** on unverified gold. "
+            f"Hand-verify `data/gold/gold_test.jsonl` (or use --silver-only) before quoting "
+            f"these as headline numbers.\n"
+        )
     if teacher_local:
         money = f"""# Money table — invoice extraction (local open teacher → distilled student)
 
