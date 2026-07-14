@@ -9,7 +9,7 @@ _Teacher `qwen3:14b` and student `Qwen/Qwen2.5-0.5B-Instruct` both run locally o
 |---|---|---|---|
 | Model footprint | 14B-class | Qwen2.5-0.5B-Instruct (~0.5B) | **~28× smaller** |
 | Quality (field_f1) | 1.0000 (ref) | 0.9647 (96.5% of teacher) | meets 95% bar |
-| Schema-valid rate | — | 100.0% | robustness |
+| Schema-valid rate | — | 100.0% *(after ≤3-attempt constrained-repair retry; first-pass ≈97%)* | robustness |
 | Exact match | — | 54.1% | strictest view |
 | p95 latency | full 14B forward | 5,921 ms | smaller footprint |
 | Data egress | stays local | stays local | on-prem / private |

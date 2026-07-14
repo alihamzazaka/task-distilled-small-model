@@ -132,8 +132,13 @@ The task, output schema, metric M, and quality bar are committed in
 - **Task:** invoice/receipt text → canonical JSON (`src/distil_task/schema.py`).
 - **Metric M:** `field_f1` on the human-verified gold set.
 - **Bar:** student ≥ `0.95 ×` teacher on M (`task.quality_bar_ratio`).
-- **Student base:** `unsloth/Qwen2.5-3B-Instruct`, full fine-tune.
-- **Teacher:** `claude-sonnet-4-5` (provider `anthropic`).
+- **Student base:** `Qwen/Qwen2.5-0.5B-Instruct`, full fine-tune (fits 16 GB easily).
+- **Teacher:** `qwen3:14b` via Ollama (provider `local_openai`, `think:false`).
+
+The original plan targeted a 3B student and a paid `claude-sonnet-4-5` teacher;
+the as-built config swapped in a free local open-weights teacher and a 0.5B base
+(the 3B download was unreliable on this link) — which is exactly why the dollar
+cost thesis remains gated on a paid teacher (see `docs/phase-2/`).
 
 Nothing to run here — just confirm you agree with those before generating data.
 
@@ -179,7 +184,7 @@ GPU box for training/eval.
 ## 5. Phase 2 — train the student (GPU box)
 
 ```bash
-# Full run per configs/default.yaml (Qwen2.5-3B full FT, 3 epochs):
+# Full run per configs/default.yaml (Qwen2.5-0.5B full FT, 3 epochs):
 python scripts/train.py
 
 # Force the transformers/TRL backend instead of unsloth:

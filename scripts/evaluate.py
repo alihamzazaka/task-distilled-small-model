@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -44,6 +45,16 @@ from serve_path_shim import ensure_serve_on_path  # noqa: E402
 
 ensure_serve_on_path()
 from infer import StructuredExtractor, TransformersBackend  # noqa: E402
+
+
+def params_billions(model_name: str) -> float | None:
+    """Best-effort parse of a parameter count, in billions, from a model id.
+
+    E.g. 'qwen3:14b' -> 14.0, 'Qwen/Qwen2.5-0.5B-Instruct' -> 0.5. Returns None
+    when the name carries no size tag, so callers can fall back to a neutral label.
+    """
+    hits = re.findall(r"(\d+(?:\.\d+)?)[bB](?![A-Za-z0-9])", model_name)
+    return float(hits[-1]) if hits else None
 
 
 def run_model(extractor: StructuredExtractor, records: list[dict], label: str):
@@ -232,6 +243,19 @@ def main() -> int:
             f"Hand-verify `data/gold/gold_test.jsonl` (or use --silver-only) before quoting "
             f"these as headline numbers.\n"
         )
+    # Size labels are derived from the configured model ids (not hardcoded) so a
+    # teacher/student swap in configs/default.yaml keeps the table honest.
+    teacher_b = params_billions(teacher_model)
+    student_b = params_billions(student_model)
+    teacher_class = f"{teacher_b:g}B-class" if teacher_b else "open teacher"
+    student_size = f" (~{student_b:g}B)" if student_b else ""
+    footprint_win = (
+        f"**~{teacher_b / student_b:.0f}× smaller**"
+        if teacher_b and student_b else "smaller"
+    )
+    teacher_forward = f"full {teacher_b:g}B forward" if teacher_b else "full teacher forward"
+    student_note = f"a ~{student_b:g}B student" if student_b else "the student"
+    max_retries = int(cfg["inference"]["max_retries"])
     if teacher_local:
         money = f"""# Money table — invoice extraction (local open teacher → distilled student)
 
@@ -240,15 +264,15 @@ _Teacher `{teacher_model}` and student `{student_model}` both run locally on the
 
 | Axis | Teacher ({teacher_model}) | Student (distilled) | Win |
 |---|---|---|---|
-| Model footprint | 14B-class | {student_model.split('/')[-1]} (~0.5B) | **~28× smaller** |
+| Model footprint | {teacher_class} | {student_model.split('/')[-1]}{student_size} | {footprint_win} |
 | Quality ({metric_name}) | {teacher_m:.4f} (ref) | {student_m:.4f} ({ratio:.1%} of teacher) | {"meets" if ratio >= bar else "below"} {bar:.0%} bar |
-| Schema-valid rate | — | {quality['schema_valid_rate']:.1%} | robustness |
+| Schema-valid rate | — | {quality['schema_valid_rate']:.1%} (after ≤{max_retries} constrained-repair retries) | robustness |
 | Exact match | — | {quality['exact_match']:.1%} | strictest view |
-| p95 latency | full 14B forward | {p95*1000:,.0f} ms | smaller footprint |
+| p95 latency | {teacher_forward} | {p95*1000:,.0f} ms | smaller footprint |
 | Data egress | stays local | stays local | on-prem / private |
 | $/1k (GPU amortized) | ${t_1k:,.4f} | ${s_1k:,.4f} | both ~free locally |
 
-**Honest note on cost:** with a *free local* teacher, the "1/40th the cost of a frontier API" pitch does **not** apply — both models run on your own GPU, so the student is not cheaper than the teacher in dollars. The real value here is **footprint** (a ~0.5B student packs alongside other workloads and serves at {throughput_rps:.2f} req/s) and **privacy** (nothing leaves the box). To make the dollar-cost case, distill from a **paid** frontier teacher: then student ${s_1k:,.4f}/1k vs the API list price is the headline (set `teacher.provider` to a paid client in configs/default.yaml).
+**Honest note on cost:** with a *free local* teacher, the "1/40th the cost of a frontier API" pitch does **not** apply — both models run on your own GPU, so the student is not cheaper than the teacher in dollars. The real value here is **footprint** ({student_note} packs alongside other workloads and serves at {throughput_rps:.2f} req/s) and **privacy** (nothing leaves the box). To make the dollar-cost case, distill from a **paid** frontier teacher: then student ${s_1k:,.4f}/1k vs the API list price is the headline (set `teacher.provider` to a paid client in configs/default.yaml).
 
 *Assumptions: GPU ${params.gpu_price_usd:,.0f} amortized over {params.gpu_lifetime_years:g} years, {params.gpu_power_watts:g} W at ${params.electricity_usd_per_kwh}/kWh, measured throughput {throughput_rps:.2f} req/s.*
 """

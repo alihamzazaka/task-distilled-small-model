@@ -1,5 +1,5 @@
 {
-  "model_dir": "C:\\Users\\alihamza\\Downloads\\projects\\New folder (3)\\02-task-distilled-small-model\\models\\student",
+  "model_dir": "models/student",
   "n_gold": 37,
   "n_unverified_excluded": 60,
   "n_unverified_scored": 0,

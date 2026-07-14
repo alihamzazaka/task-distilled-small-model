@@ -67,7 +67,8 @@ the cross-model circularity, (3) **scaling the student to the SPEC's 1–3B band
 with a clean capacity-vs-data ablation, and (4) a **working one-command `ollama
 run`** via a valid llama.cpp GGUF. It is a **plan, not yet built** — every v2.0
 number is a target anchored on the measured v1.0 baseline (student field-F1 0.9647 =
-96.5% of teacher, 100% schema-valid, 118 tests). See
+96.5% of teacher; 100% schema-valid *after* the ≤3-attempt constrained-repair retry
+loop, ~97% first pass; 118 tests). See
 [docs/phase-2/README.md](docs/phase-2/README.md).
 
 ## Tech stack (compact)
@@ -115,6 +116,7 @@ Full checklist and supporting artifacts: [docs/03-requirements.md](docs/03-requi
 │   ├── 00_generate_seed_inputs.py    # Phase 1: seed pool (raw + teacher-synthesized)   [laptop, API-only]
 │   ├── 01_generate_teacher_labels.py # Phase 1: teacher labels + consistency 2nd pass    [laptop, API-only]
 │   ├── 02_filter_and_split.py        # Phase 1: filter → splits + gold template          [laptop]
+│   ├── 03_silver_verify.py           # Phase 2b: silver-verify gold via independent 2nd model
 │   ├── train.py                      # Phase 2: SFT (Unsloth primary, TRL fallback)      [GPU]
 │   ├── evaluate.py                   # Phase 3: money table + eval_report.json           [GPU]
 │   ├── export_ollama.py              # Phase 4: merge + Modelfile + GGUF instructions     [GPU]
@@ -133,18 +135,23 @@ Full checklist and supporting artifacts: [docs/03-requirements.md](docs/03-requi
 
 ## Status / next step
 
-**Pipeline implemented; ready to run on the GPU box.** The full teacher→student→eval→package
-code path is written and the pure-logic layer is covered by a green test suite:
+**Built and measured (v1.0).** The full teacher→student→eval→package loop has been run end
+to end on the RTX 5080 — with one honest substitution: the teacher is a **free local
+open-weights model** (`qwen3:14b` via Ollama), not a paid frontier API.
 
-- **Done:** task + schema + metric committed (Phase 0); data-generation, filtering, splitting,
-  training, evaluation, constrained-output serving, Ollama export, and the cost dashboard are all
-  coded against `configs/default.yaml`; `pytest tests/` passes (schema / metrics / filtering /
-  cost-model), and `python serve/infer.py --demo` exercises the retry loop with no GPU.
-- **Not yet produced (require the RTX 5080 + a teacher API key):** the generated distillation
-  dataset, the human-verified gold set, the trained student checkpoint, and the filled-in money
-  table. These are *runs*, not code — follow [RUNBOOK.md](RUNBOOK.md).
+- **Done:** task + schema + metric committed (Phase 0); seed inputs generated, teacher-labeled,
+  filtered, and split (`data/labeled/`, `data/splits/`); a `Qwen/Qwen2.5-0.5B-Instruct` student
+  fully fine-tuned (`models/student/`, `models/student-merged/`); evaluated on the
+  silver-verified gold set — student field-F1 **0.9647 = 96.5% of teacher**, meeting the
+  pre-committed 95% bar, with 100% schema-valid output after the constrained-repair retry loop
+  (first pass ~97%) — and the money table filled in (`reports/money_table.md`); `pytest tests/`
+  green (118 tests).
+- **Still gated (the honest caveats):** the **paid frontier-teacher cost thesis** — with a free
+  local teacher both models run at ~$0/1k on the same GPU, so the signature "1/40th the cost"
+  dollar win remains unproven — and the **human-verified gold set** (current numbers are
+  silver-grade cross-model agreement, not human ground truth). Both are scoped as Phase 2 / v2.0
+  ([docs/phase-2/README.md](docs/phase-2/README.md)).
 
-**Next step:** on the laptop, `pip install -r requirements-laptop.txt` and run Phase 1 data
-generation (`scripts/00…02`, API-only); hand-verify the gold set; then move to the GPU box for
-training (`scripts/train.py`), evaluation (`scripts/evaluate.py`), and packaging
-(`scripts/export_ollama.py`). See [RUNBOOK.md](RUNBOOK.md) for the exact commands.
+**Next step:** point `teacher.provider` at a paid frontier API and re-run Phase 1→3 to measure
+the real $/1k win and break-even volume, and hand-verify `data/gold/gold_test.jsonl` to upgrade
+the gold set from silver to human-verified. See [RUNBOOK.md](RUNBOOK.md) for the exact commands.
