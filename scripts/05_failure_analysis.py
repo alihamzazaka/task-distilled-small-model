@@ -111,7 +111,8 @@ def write_report(out: Path, cats: Counter, leaves: Counter, docs: list[dict]) ->
     L = [
         "# Categorized failure analysis — student vs gold (SPEC deliverable 5)",
         "",
-        f"_{n_docs} human-verified gold documents · {n_fields} compared fields "
+        f"_{n_docs} silver-grade gold documents (cross-model agreement, not "
+        f"human-rated — see reports/eval_report.json) · {n_fields} compared fields "
         f"(same flatten + tolerance rules as the shipped eval) · "
         f"**{n_perfect}/{n_docs} documents fully correct** · "
         f"{n_errors} field errors ({n_errors / max(n_fields, 1):.1%} of fields). "

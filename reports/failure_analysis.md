@@ -1,6 +1,6 @@
 # Categorized failure analysis — student vs gold (SPEC deliverable 5)
 
-_37 human-verified gold documents · 711 compared fields (same flatten + tolerance rules as the shipped eval) · **20/37 documents fully correct** · 25 field errors (3.5% of fields). Regenerate: `python scripts/05_failure_analysis.py`._
+_37 silver-grade gold documents (cross-model agreement, not human-rated — see reports/eval_report.json) · 711 compared fields (same flatten + tolerance rules as the shipped eval) · **20/37 documents fully correct** · 25 field errors (3.5% of fields). Regenerate: `python scripts/05_failure_analysis.py`._
 
 ## Where the residual gap lives (by category)
 
