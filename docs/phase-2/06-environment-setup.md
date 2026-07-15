@@ -48,12 +48,27 @@ Expect `usd_per_1k > 0` (unlike v1.0's $0). The disk cache means re-running the 
 
 ## F2 — Human-verified gold
 
-No new services. Add a lightweight IAA helper (new script, e.g. `scripts/04_gold_iaa.py`) using only stdlib + numpy (already installed) to compute field-level agreement and Cohen's κ across two labeled copies of `data/gold/gold_test.jsonl`. Annotators work directly in the JSONL per [`data/gold/LABELING_GUIDE.md`](../../data/gold/LABELING_GUIDE.md); no annotation platform is required at this scale.
+No new services. The turnkey rating pipeline is **built** (stdlib-only, no GPU,
+no API) — see [RUNBOOK §9](../../RUNBOOK.md) for the full recruit → rate →
+adjudicate → score sequence:
 
 ```bash
-# after two annotators produce gold_A.jsonl and gold_B.jsonl:
-python scripts/04_gold_iaa.py --a data/gold/gold_A.jsonl --b data/gold/gold_B.jsonl
+python scripts/gold_sample.py --n 150          # active-learning rating sheet + instructions
+# two humans fill data/gold/rater_a.csv + rater_b.csv (see rating_instructions.md), then:
+python scripts/gold_kappa.py --rater-a data/gold/rater_a.csv --rater-b data/gold/rater_b.csv
+# after adjudication (data/gold/adjudicated.csv):
+python scripts/gold_kappa.py --rater-a … --rater-b … --adjudicated data/gold/adjudicated.csv
 ```
+
+The κ scorer (`scripts/gold_kappa.py`) computes Cohen's κ + raw agreement, emits
+the adjudication queue, and — once the adjudicated gold exists — reports the
+human-verified accuracy. The active-learning sampler (`scripts/gold_sample.py`)
+picks the most informative pairs from `reports/gold_predictions.jsonl` and
+stratifies by currency. The whole loop is **validated now** with a synthetic
+LLM stand-in rater (`scripts/gold_synthetic_raters.py` → `reports/gold_pipeline_demo.md`),
+clearly labelled as SYNTHETIC — not a substitute for the two human CSVs. The
+legacy hand-edit path (`data/gold/LABELING_GUIDE.md`, editing the JSONL in place)
+remains valid for small in-place corrections.
 
 ## F3 — Scaling the student
 

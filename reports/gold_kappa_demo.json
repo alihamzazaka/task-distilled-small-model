@@ -1,0 +1,22 @@
+{
+  "inter_rater": {
+    "n": 20,
+    "cohen_kappa": 0.6000000000000001,
+    "raw_agreement": 0.8,
+    "n_disagreements": 4,
+    "confusion": {
+      "correct|correct": 7,
+      "correct|incorrect": 1,
+      "incorrect|correct": 3,
+      "incorrect|incorrect": 9
+    }
+  },
+  "model_vs_human": {
+    "n": 20.0,
+    "human_verified_accuracy": 0.55,
+    "n_correct": 11.0,
+    "n_incorrect": 9.0,
+    "precision_correct": 0.55,
+    "recall_correct": 1.0
+  }
+}

@@ -1,0 +1,496 @@
+id,source_document,model_extraction,label,notes
+seed-a5cb91c1331c7674,"INVOICE NO: 345678 DATE: 14.03.2024 VENDOR: KAPIL CONSTRUCTION SUPPLIES, DELHI, INDIA CUSTOMER: VIJAY KUMAR, 123 ROHINI RD, DELHI AMOUNT DUE: ₹32,000.00
+
+Item Description        Qty   Rate       Amount
+----------------------------------------------
+Brick (First Class)     1,000 ₹32.00     ₹32,000.00
+----------------------------------------------
+Subtotal:                  ₹32,000.00
+CGST (9%):                ₹2,880.00
+SGST (9%):                ₹2,880.00
+GRAND TOTAL:              ₹37,760.00
+
+Terms: Net 45 days. For any queries, contact: 9876543210","{""currency"": ""INR"", ""date"": ""2024-03-14"", ""grand_total"": 37760.0, ""line_items"": [{""description"": ""Brick (First Class)"", ""qty"": 1000.0, ""total"": 32000.0, ""unit_price"": 32.0}, {""description"": ""Subtotal"", ""qty"": 1.0, ""total"": 0.0, ""unit_price"": 0.0}], ""payment_terms"": ""Net 45 days"", ""subtotal"": 32000.0, ""tax"": 2880.0, ""vendor"": ""Kapil Construction Supplies, Delhi, India""}",,
+seed-b82cb676efff7d14,"14.03.2024
+
+Le Jardin du Soleil
+12 Rue de la Paix, 75002 Paris, France
+Tel: +33 1 23 45 67 89
+
+Facture #FR20240314-004
+
+Client: M. Thomas Martin
+Adresse: 5 Avenue des Gobelins, 75005 Paris
+
+Articles:
+Croissant au citron         2       €2.80
+Jus d'orange                1       €1.95
+Café noir                   2       €2.40
+
+Soussolde:                            €9.15
+TVA (20%)                            €1.83
+Total:                              €10.98
+
+Paiement: CB
+
+Merci pour votre visite! *","{""currency"": ""EUR"", ""date"": ""2024-03-14"", ""grand_total"": 12.43, ""line_items"": [{""description"": ""Croissant au citron"", ""qty"": 2.0, ""total"": 5.6, ""unit_price"": 2.8}, {""description"": ""Jus d'orange"", ""qty"": 1.0, ""total"": 1.95, ""unit_price"": 1.95}, {""description"": ""Café noir"", ""qty"": 2.0, ""total"": 4.8, ""unit_price"": 2.4}], ""payment_terms"": null, ""subtotal"": 10.6, ""tax"": 1.83, ""vendor"": ""Le Jardin du Soleil""}",,
+seed-4150f7c8673ecba4,"Store: Costco | 1010 Main St, Vancouver, BC V6B 2Y3 | Tel: 604-444-5555 | Date: 03/17/2024
+
+Item Description             Qty  Unit Price  Total
+--------------------------------------------
+* Chicken, Boneless 1.5 lb  1  $9.99  $9.99
+* Ground Beef 1 lb  2  $6.49  $12.98
+* Frozen Pizza, Pepperoni 2 pkgs  3  $2.99  $8.97
+* Laundry Detergent, Concentrate 30 oz  1  $14.99  $14.99
+* Paper Towels, 36 Roll  1  $7.99  $7.99
+
+Subtotal: $54.92
+Tax: $4.39
+Total: $59.31
+
+Thank you for choosing Costco. Your membership helps us provide the best value.
+
+* This receipt is not valid for returns unless the item is unopened and in original packaging.
+* All items are final sale unless otherwise specified.
+* Membership card required for returns.
+
+Cashier: 04 | Drawer: 5 | Till No: 789012","{""currency"": ""USD"", ""date"": ""2024-03-17"", ""grand_total"": 59.31, ""line_items"": [{""description"": ""Chicken, Boneless 1.5 lb"", ""qty"": 1.0, ""total"": 9.99, ""unit_price"": 9.99}, {""description"": ""Ground Beef 1 lb"", ""qty"": 2.0, ""total"": 12.98, ""unit_price"": 6.49}, {""description"": ""Frozen Pizza, Pepperoni"", ""qty"": 3.0, ""total"": 8.97, ""unit_price"": 2.99}, {""description"": ""Laundry Detergent, Concentrate"", ""qty"": 1.0, ""total"": 14.99, ""unit_price"": 14.99}, {""description"": ""Paper Towels, 36 Roll"", ""qty"": 1.0, ""total"": 7.99, ""unit_price"": 7.99}], ""payment_terms"": null, ""subtotal"": 54.92, ""tax"": 4.39, ""vendor"": ""Costco""}",,
+seed-1c8db947bab77aa7,"CAFE LUNA • Rua das Flores, 78 • Lisboa, Portugal
+
+Recibo nº 987654 • Data: 14 de março de 2024 • Cliente: Ana Costa
+
+Produto	Qtde	Preço Unitário	Total
+Café expresso	2	€3.50	€7.00
+Pão de alho	1	€2.75	€2.75
+
+Total: €9.75 • IVA 23%: €2.24 • Total final: €11.99
+
+Atendente: Carla Mendes • Tel: +351 21 987 6543","{""currency"": ""EUR"", ""date"": ""2024-03-14"", ""grand_total"": 11.99, ""line_items"": [{""description"": ""Café expresso"", ""qty"": 2.0, ""total"": 7.0, ""unit_price"": 3.5}, {""description"": ""Pão de alho"", ""qty"": 1.0, ""total"": 2.75, ""unit_price"": 2.75}], ""payment_terms"": null, ""subtotal"": 9.75, ""tax"": 2.24, ""vendor"": ""CAFÉ LUNA""}",,
+seed-a91cd9e68c213ce3,"London Dental Care (NHS)
+500 Holloway Road, London, N7 8DB
+Tel: +44 20 7636 1000
+Fax: +44 20 7636 1001
+Patient ID: PT-2024-03-14-004
+Date: 14/03/2024
+
+Patient Name: Emma Taylor
+Referral: Dr. Rachel Smith
+
+Treatment Item            Qty  Unit Cost (£)  Total (£)
+--------------------------------------------------
+Root Canal                1          110.00         110.00
+Dental Bridge             1          420.00         420.00
+
+Subtotal:                            £530.00
+NHS Funding (70%):              (£371.00)
+Patient Charge:                    £159.00
+
+Payment due on receipt
+
+For all queries, contact: nhsdental@london-dental.nhs.uk","{""currency"": ""GBP"", ""date"": ""2024-03-14"", ""grand_total"": 159.0, ""line_items"": [{""description"": ""Root Canal"", ""qty"": 1.0, ""total"": 110.0, ""unit_price"": 110.0}, {""description"": ""Dental Bridge"", ""qty"": 1.0, ""total"": 420.0, ""unit_price"": 420.0}], ""payment_terms"": null, ""subtotal"": 530.0, ""tax"": 0.0, ""vendor"": ""London Dental Care (NHS)""}",,
+seed-bc31d97c0b346fc0,"Order Confirmation #XW4532
+Date: 14.03.2024
+Customer: Anna M. Lopes
+Email: annalopes@example.com
+
+Order Summary:
+Item: Wireless Bluetooth Headphones 2.0
+Qty: 1
+Price: €139.99
+Discount: 15% off
+Total: €118.99
+
+Item: Premium USB-C Charger
+Qty: 1
+Price: €29.99
+Total: €29.99
+
+Shipping: Express Delivery (Europe)
+Cost: €12.00
+
+Subtotal: €147.98
+Discount: €21.00
+Total after discount: €126.98
+Shipping: €12.00
+
+Grand Total: €138.98
+
+Thank you for shopping with TechNova! Your order will ship within 3 business days.
+
+www.technova.de | support@technova.de","{""currency"": ""EUR"", ""date"": ""2024-03-14"", ""grand_total"": 138.98, ""line_items"": [{""description"": ""Wireless Bluetooth Headphones 2.0"", ""qty"": 1.0, ""total"": 139.99, ""unit_price"": 139.99}, {""description"": ""Premium USB-C Charger"", ""qty"": 1.0, ""total"": 29.99, ""unit_price"": 29.99}], ""payment_terms"": null, ""subtotal"": 147.98, ""tax"": 0.0, ""vendor"": ""TechNova""}",,
+seed-2f797a2a387e1688,"Hotel Caribe - Recibo de Alojamento
+Número: 112233445
+Fecha de entrada: 21/09/2024 | Fecha de salida: 24/09/2024
+Cliente: Luis Mendoza
+Dirección: Av. del Sol, 555, Playa del Carmen, Quintana Roo, México
+
+Cantidad  Descripción               Precio Unitario  Total
+3         Habitación Doble 1 dia    $ 180.00 USD    $ 540.00 USD
+4         Cena en Restaurante       $ 60.00 USD     $ 240.00 USD
+2         Servicio de Conserje      $ 30.00 USD     $ 60.00 USD
+
+Subtotal: $ 840.00 USD
+Impuesto (IVA 16%): $ 134.40 USD
+Total: $ 974.40 USD
+
+Firma: _________________________
+Fecha: 24/09/2024","{""currency"": ""USD"", ""date"": ""2024-09-24"", ""grand_total"": 974.4, ""line_items"": [{""description"": ""Habitación Doble 1 día"", ""qty"": 3.0, ""total"": 540.0, ""unit_price"": 180.0}, {""description"": ""Cena en Restaurante"", ""qty"": 4.0, ""total"": 240.0, ""unit_price"": 60.0}, {""description"": ""Servicio de Conserje"", ""qty"": 2.0, ""total"": 60.0, ""unit_price"": 30.0}], ""payment_terms"": null, ""subtotal"": 840.0, ""tax"": 134.4, ""vendor"": ""Hotel Caribe""}",,
+seed-6e86a2fc3d77a7fb,"INVOICE #INV-987654321 | DATE: 14/03/2024 | VENDOR: Auto Reparatur Betrieb | ADDRESS: Bahnhofstraße 12, 70174 Stuttgart, DEUTSCHLAND | CURRENCY: € | TERMS: Net 30
+
+CLIENT: Max Müller | ADDRESS: Am Neckar 12, 70174 Stuttgart, DEUTSCHLAND
+
+DESCRIPTION          | QUANTITY | UNIT PRICE (€) | TOTAL (€)
+--------------------------------------------------------
+Engine Repair       | 1        | 800.00         | 800.00
+Tire Replacement    | 4        | 120.00         | 480.00
+Oil Change          | 1        | 60.00          | 60.00
+--------------------------------------------------------
+SUBTOTAL:             1,340.00
+VAT (19%):             254.60
+GRAND TOTAL:          1,594.60
+
+INVOICE GENERATED BY: Auto Reparatur Betrieb | CONTACT: info@autorep.st | PHONE: +49 711 1234567","{""currency"": ""EUR"", ""date"": ""2024-03-14"", ""grand_total"": 1594.6, ""line_items"": [{""description"": ""Engine Repair"", ""qty"": 1.0, ""total"": 800.0, ""unit_price"": 800.0}, {""description"": ""Tire Replacement"", ""qty"": 4.0, ""total"": 480.0, ""unit_price"": 120.0}, {""description"": ""Oil Change"", ""qty"": 1.0, ""total"": 60.0, ""unit_price"": 60.0}], ""payment_terms"": null, ""subtotal"": 1340.0, ""tax"": 254.6, ""vendor"": ""Auto Reparatur Betrieb""}",,
+seed-7da529427548f589,"INVOICE #20240320-0077
+
+From: KFC Indonesia
+Address: Jl. Sudirman No. 123, Jakarta, Indonesia
+Phone: +62 21 1234 5678
+
+To: PT. Food Corp.
+Address: Jl. Gatot Subroto, Jakarta, Indonesia
+
+Date: 20 Maret 2024
+Due Date: 20 April 2024
+
+Description                    Qty      Harga Satuan   Total
+-----------------------------------------------
+Chicken Bucket 12pc         5          Rp 78,000      Rp 390,000
+French Fries 500g           3          Rp 15,000      Rp 45,000
+Coca-Cola 330ml             10         Rp 8,000       Rp 80,000
+-----------------------------------------------
+Subtotal:                    Rp 515,000
+Pajak 10%:                  Rp 51,500
+Total:                       Rp 566,500
+
+Payment Terms: Net 30
+
+* Dokumen ini mungkin mengandung kesalahan OCR. Mohon konfirmasi dengan kami.
+
+KFC Indonesia - Semua Hak Dilindungi Undang-Undang","{""currency"": ""IDR"", ""date"": ""2024-03-20"", ""grand_total"": 566500.0, ""line_items"": [{""description"": ""Chicken Bucket 12pcs"", ""qty"": 5.0, ""total"": 390000.0, ""unit_price"": 78000.0}, {""description"": ""French Fries 500g"", ""qty"": 3.0, ""total"": 45000.0, ""unit_price"": 15000.0}, {""description"": ""Coca-Cola 330ml"", ""qty"": 10.0, ""total"": 80000.0, ""unit_price"": 8000.0}], ""payment_terms"": ""Net 30"", ""subtotal"": 515000.0, ""tax"": 51500.0, ""vendor"": ""KFC Indonesia""}",,
+seed-858ec46d4c0f9514,"14/03/2024
+
+Máquina Servis GmbH
+Frankfurter Straße 23
+60309 Frankfurt, Germany
+Tel: +49 69 333 5555
+
+Kundenname: Lena Wagner
+Maschine: LKW-Gabelstapler (Seriennummer: GS-9901)
+
+Wartungsauftrag #WA-2024-0314
+Datum: 14/03/2024
+
+Leistungen:
+
+* Inspektion und Reinigung – 1 @ €85,00 = €85,00
+
+* Austausch von Batterien – 2 @ €18,00 = €36,00
+
+* Wartungsarbeit – 3,25 Stunden @ €60,00/Stunde = €195,00
+
+Zwischensumme: €316,00
+Mehrwertsteuer (19%): €59, 24
+Gesamt: €375,24
+
+Zahlung innerhalb von 14 Tagen.
+
+Mit freundlichen Grüßen,
+
+Máquina Servis
+www.maschinenservis.de
+
+***","{""currency"": ""EUR"", ""date"": ""2024-03-14"", ""grand_total"": 375.24, ""line_items"": [{""description"": ""Inspektion und Reinigung"", ""qty"": 1.0, ""total"": 85.0, ""unit_price"": 85.0}, {""description"": ""Austausch von Batterien"", ""qty"": 2.0, ""total"": 36.0, ""unit_price"": 18.0}, {""description"": ""Wartungsarbeit"", ""qty"": 3.25, ""total"": 195.0, ""unit_price"": 60.0}], ""payment_terms"": ""Zahlung innerhalb von 14 Tage"", ""subtotal"": 316.0, ""tax"": 59.24, ""vendor"": ""Máquina Servis GmbH""}",,
+seed-8cef29a4290183a6,"INVOICE #789456
+Client: NovaTech Solutions
+Date: 14/03/2024
+Due Date: 14/04/2024
+
+Hours Rendered:
+- Strategy Consultation: 8.5 hrs @ £75.00/hr = £637.50
+- UI/UX Design: 12.0 hrs @ £95.00/hr = £1,140.00
+- Marketing Analysis: 4.5 hrs @ £65.00/hr = £292.50
+
+Subtotal: £2,070.00
+VAT (20%): £414.00
+Total Amount Due: £2,484.00
+
+Payment Terms: Net 30
+
+Bank Details:
+Account Name: Creativa Ltd.
+IBAN: GB29NWBK60161331926819
+
+Thank you for your trust.
+www.creativaltd.co.uk","{""currency"": ""GBP"", ""date"": ""2024-03-14"", ""grand_total"": 2484.0, ""line_items"": [{""description"": ""Strategy Consultation"", ""qty"": 8.5, ""total"": 637.5, ""unit_price"": 75.0}, {""description"": ""UI/UX Design"", ""qty"": 12.0, ""total"": 1140.0, ""unit_price"": 95.0}, {""description"": ""Marketing Analysis"", ""qty"": 4.5, ""total"": 292.5, ""unit_price"": 65.0}], ""payment_terms"": ""Net 30"", ""subtotal"": 2070.0, ""tax"": 414.0, ""vendor"": ""NovaTech Solutions""}",,
+seed-a083f5d539ae2046,"INVOICE #INV-459876
+Issue Date: 14/03/2024
+Due Date: 27/03/2024
+
+Client: TechNova Solutions
+Address: 123 Innovation Lane, San Jose, CA 95131, USA
+
+Service Provider: PixelMind Consulting Ltd
+Address: 456 Creativity Blvd, Warsaw, 02-791, Poland
+
+Description                              Qty      Rate       Amount
+
+UX Design Consultation                 10 hrs   €125.00    €1,250.00
+Frontend Development                 15 hrs   €110.00    €1,650.00
+Marketing Strategy Planning          8 hrs    €95.00     €760.00
+
+Subtotal:                                €3,660.00
+VAT (23%)                                €841.80
+Total Amount Due:                       €4,501.80
+
+Payment Terms: Net 30 days from invoice date
+
+Thank you for your trust and collaboration.
+www.pixelmindconsulting.pl","{""currency"": ""EUR"", ""date"": ""2024-03-27"", ""grand_total"": 4501.8, ""line_items"": [{""description"": ""UX Design Consultation"", ""qty"": 10.0, ""total"": 1250.0, ""unit_price"": 125.0}, {""description"": ""Frontend Development"", ""qty"": 15.0, ""total"": 1650.0, ""unit_price"": 110.0}, {""description"": ""Marketing Strategy Planning"", ""qty"": 8.0, ""total"": 760.0, ""unit_price"": 95.0}], ""payment_terms"": ""Net 30 days from invoice date"", ""subtotal"": 3660.0, ""tax"": 841.8, ""vendor"": ""PixelMind Consulting Ltd""}",,
+seed-af644e5b50b4076d,"MÉDICAMENTOS SANTOS LTDA
+Rua das Flores, 123 · São Paulo, SP · BR
+Tel: +55 11 2222-3333 · Email: contato@medsantos.com.br
+
+Data: 14.03.2024 · Número: INV-789456
+
+Paciente: Maria Oliveira · CPF: 123.456.789-01
+
+Medicamentos Prescritos:
+
+Paracetamol 500mg (10 comp) · R$ 25.00
+Omeprazol 20mg (14 comp) · R$ 35.00
+Captopril 25mg (30 comp) · R$ 45.00
+
+Subtotal: R$ 105.00
+Imposto (10%): R$ 10.50
+Total: R$ 115.50
+
+Forma de Pagamento: Crédito
+Data de Pagamento: 15.03.2024
+
+Assinatura: ___________________________ · Dr. Carlos Martins","{""currency"": ""BRL"", ""date"": ""2024-03-14"", ""grand_total"": 115.5, ""line_items"": [{""description"": ""Paracetamol 500mg (10 comp)"", ""qty"": 1.0, ""total"": 25.0, ""unit_price"": 25.0}, {""description"": ""Omeprazol 20mg (14 comp)"", ""qty"": 1.0, ""total"": 35.0, ""unit_price"": 35.0}, {""description"": ""Captopril 25mg (30 comp)"", ""qty"": 1.0, ""total"": 45.0, ""unit_price"": 45.0}], ""payment_terms"": ""Crédito"", ""subtotal"": 105.0, ""tax"": 10.5, ""vendor"": ""MÉDICAMENTOS SANTOS LTDA""}",,
+seed-cba016eb18af33ee,"Factura de Servicios - 800 Hotel da Ilha, Fortaleza, Brazil
+
+Data: 25/03/2024
+Check-in: 22/03/2024 - Check-out: 25/03/2024
+
+Item                        Quant.   Preço Unitário     Total
+-------------------------------------------------------------------------------
+Diária (Quarto Deluxe)         3      R$ 520,00      R$ 1.560,00
+Almoço para 2 pessoas (3 dias) 3      R$ 90,00       R$ 270,00
+Serviço de Transporte           1      R$ 200,00      R$ 200,00
+-------------------------------------------------------------------------------
+Subtotal:                         R$ 2.030,00
+Taxa de Serviço (10%)             R$ 203,00
+Total Geral:                      R$ 2.233,00
+
+Assinatura do Hóspede: ________________________","{""currency"": ""BRL"", ""date"": ""2024-03-25"", ""grand_total"": 2233.0, ""line_items"": [{""description"": ""Diária (Quarto Deluxe)"", ""qty"": 3.0, ""total"": 1560.0, ""unit_price"": 520.0}, {""description"": ""Almoço para 2 pessoas (3 dias)"", ""qty"": 3.0, ""total"": 270.0, ""unit_price"": 90.0}, {""description"": ""Serviço de Transporte"", ""qty"": 1.0, ""total"": 200.0, ""unit_price"": 200.0}], ""payment_terms"": null, ""subtotal"": 2030.0, ""tax"": 203.0, ""vendor"": ""Hotel da Ilha""}",,
+seed-8e6b7660de2dfde6,"MOTOR MASTERS AUTOREPAIR
+Rua das Oficinas, 123
+São Paulo, SP, Brazil
+Tel: +55 11 98765-4321
+
+Cliente: João Pereira
+Data: 14.03.2024
+Ordem: #A89234
+
+DETALHES DA REPARAÇÃO:
+Item	Quantidade	Preço Unitário	Total
+- Cambio de óleo	1	R$ 120.00	R$ 120.00
+- Filtro de óleo	1	R$ 35.00	R$ 35.00
+- Revisão do freio	2	R$ 150.00	R$ 300.00
+- Labor	3.5h	R$ 80.00/h	R$ 280.00
+
+Subtotal	R$ 735.00
+Imposto (10%)	R$ 73.50
+Total	R$ 808.50
+
+Forma de Pagamento: À vista
+Data de Entrega: 18.03.2024
+Assinatura do Cliente: _________________________
+
+*Este documento é válido por 30 dias a partir da data de emissão.","{""currency"": ""BRL"", ""date"": ""2024-03-14"", ""grand_total"": 808.5, ""line_items"": [{""description"": ""Cambio de óleo"", ""qty"": 1.0, ""total"": 120.0, ""unit_price"": 120.0}, {""description"": ""Filtro de óleo"", ""qty"": 1.0, ""total"": 35.0, ""unit_price"": 35.0}, {""description"": ""Revisão do freio"", ""qty"": 2.0, ""total"": 300.0, ""unit_price"": 150.0}, {""description"": ""Labor"", ""qty"": 3.5, ""total"": 280.0, ""unit_price"": 80.0}], ""payment_terms"": ""À vista"", ""subtotal"": 735.0, ""tax"": 73.5, ""vendor"": ""Motor Masters Auto Repair""}",,
+seed-d3836995c9cc7a24,"Store: Whole Foods | 4567 Elm St, Calgary, AB T2P 2L7 | Tel: 403-333-4444 | Date: 03/19/2024
+
+Item Description             Qty  Unit Price  Total
+--------------------------------------------
+* Organic Mixed Greens 1 lb  1  $3.49  $3.49
+* Organic Avocado 1 pc  2  $1.99  $3.98
+* Organic Chicken Breasts 1.5 lb  1  $8.99  $8.99
+* Organic Greek Yogurt 16 oz  2  $2.99  $5.98
+* Organic Hummus 16 oz  1  $4.49  $4.49
+* Organic Almonds 12 oz  1  $6.99  $6.99
+
+Subtotal: $33.92
+Tax: $2.71
+Total: $36.63
+
+Thank you for supporting Whole Foods. We are committed to sustainability and quality.
+
+* This receipt is valid for 14 days from the date of purchase.
+* Returns accepted on unopened items within 14 days with original receipt.
+* Please check the product label for specific return policies.
+
+Cashier: 08 | Drawer: 6 | Till No: 987654","{""currency"": ""USD"", ""date"": ""2024-03-19"", ""grand_total"": 36.63, ""line_items"": [{""description"": ""Organic Mixed Greens 1 lb"", ""qty"": 1.0, ""total"": 3.49, ""unit_price"": 3.49}, {""description"": ""Organic Avocado 1 pc"", ""qty"": 2.0, ""total"": 3.98, ""unit_price"": 1.99}, {""description"": ""Organic Chicken Breasts 1.5 lb"", ""qty"": 1.0, ""total"": 8.99, ""unit_price"": 8.99}, {""description"": ""Organic Greek Yogurt 16 oz"", ""qty"": 2.0, ""total"": 5.98, ""unit_price"": 2.99}, {""description"": ""Organic Hummus 16 oz"", ""qty"": 1.0, ""total"": 4.49, ""unit_price"": 4.49}, {""description"": ""Organic Almonds 12 oz"", ""qty"": 1.0, ""total"": 6.99, ""unit_price"": 6.99}], ""payment_terms"": ""Returns accepted on unopened items within 14 days with original receipt"", ""subtotal"": 33.92, ""tax"": 2.71, ""vendor"": ""Whole Foods""}",,
+seed-09ead348fc123de0,"14 March 2024
+
+Electronics Hub, 666 York St, Ottawa, ON
+
+Customer: Olivia Park								
+
+Item	Qty	Unit Price	Total
+----------------------------------------
+Headphones		1	$29.99	$29.99
+USB Cable		3	$1.99	$5.97
+
+Subtotal:				$35.96
+PST (7%):				$2.52
+Total:				$38.48
+
+Visit us again. Thank you! www.electronicshub.ca","{""currency"": ""USD"", ""date"": ""2024-03-14"", ""grand_total"": 38.48, ""line_items"": [{""description"": ""Headphones"", ""qty"": 1.0, ""total"": 29.99, ""unit_price"": 29.99}, {""description"": ""USB Cable"", ""qty"": 3.0, ""total"": 5.97, ""unit_price"": 1.99}], ""payment_terms"": null, ""subtotal"": 35.96, ""tax"": 2.52, ""vendor"": ""Electronics Hub""}",,
+seed-23e299ee9d6d2343,"Hotel Playa Dorada - Folio de Estadía
+Ref #: 666777888
+Entrada: 30/09/2024 | Salida: 03/10/2024
+Cliente: María González
+Dirección: Calle Azul, 321, Acapulco, Guerrero, México
+
+Cantidad  Descripción               Precio Unitario  Total
+3         Habitación Suite 1 dia   $ 250.00 USD    $ 750.00 USD
+2         Almuerzo en Restaurante  $ 40.00 USD     $ 80.00 USD
+1         Servicio de Limpieza     $ 35.00 USD     $ 35.00 USD
+
+Subtotal: $ 865.00 USD
+Impuesto (IVA 16%): $ 138.40 USD
+Total: $ 1.003.40 USD
+
+Firma: __________________________
+Fecha: 03/10/2024","{""currency"": ""USD"", ""date"": ""2024-10-03"", ""grand_total"": 1003.4, ""line_items"": [{""description"": ""Habitación Suite 1 dia"", ""qty"": 3.0, ""total"": 750.0, ""unit_price"": 250.0}, {""description"": ""Almuerzo en Restaurante"", ""qty"": 2.0, ""total"": 80.0, ""unit_price"": 40.0}, {""description"": ""Servicio de Limpieza"", ""qty"": 1.0, ""total"": 35.0, ""unit_price"": 35.0}], ""payment_terms"": null, ""subtotal"": 865.0, ""tax"": 138.4, ""vendor"": ""Hotel Playa Dorada""}",,
+seed-27f83557a00e4fb4,"Invoice #1098765 | Date: 2024-04-05 | Store: Maple Leaf Grocers | 123 Main St, Toronto, Ontario M5A 1A1 | Phone: (416) 555-0198
+Customer: John Doe | Email: john.doe@example.com
+Item: Organic Apples (1.5 kg) | Price: $4.75 | Qty: 2 | Total: $9.50
+Item: Whole Grain Bread | Price: $3.25 | Qty: 3 | Total: $9.75
+Item: Milk (2L) | Price: $2.99 | Qty: 2 | Total: $5.98
+Item: Laundry Detergent | Price: $7.99 | Qty: 1 | Total: $7.99
+Subtotal: $33.22 | Tax: $2.66 | Total: $35.88
+Thank you for shopping at Maple Leaf Grocers. Your loyalty is appreciated!
+*Note: Tax rate is 13%.
+Payment received: Cash","{""currency"": ""USD"", ""date"": ""2024-04-05"", ""grand_total"": 35.88, ""line_items"": [{""description"": ""Organic Apples (1.5 kg)"", ""qty"": 2.0, ""total"": 9.5, ""unit_price"": 4.75}, {""description"": ""Whole Grain Bread"", ""qty"": 3.0, ""total"": 9.75, ""unit_price"": 3.25}, {""description"": ""Milk (2L)"", ""qty"": 2.0, ""total"": 5.98, ""unit_price"": 2.99}, {""description"": ""Laundry Detergent"", ""qty"": 1.0, ""total"": 7.99, ""unit_price"": 7.99}], ""payment_terms"": null, ""subtotal"": 33.22, ""tax"": 2.66, ""vendor"": ""Maple Leaf Grocers""}",,
+seed-458d53636e07128c,"14.03.2024
+QuickStop Market
+555 Pine St, Calgary, AB T2P 2T4
+
+Receipt #654102
+
+Customer: Sarah Lee
+
+ Item             Qty  Unit Price  Total
+ ----------------------------------
+ Chips            3      $2.99     $8.97
+ Soda             6      $1.49     $8.94
+ Yogurt           2      $1.99     $3.98
+ Peanut Butter    1      $3.99     $3.99
+ ----------------------------------
+Subtotal:       $25.88
+Tax 5%:          $1.29
+Total:           $27.17
+
+***","{""currency"": ""USD"", ""date"": ""2024-03-14"", ""grand_total"": 27.17, ""line_items"": [{""description"": ""Chips"", ""qty"": 3.0, ""total"": 8.97, ""unit_price"": 2.99}, {""description"": ""Soda"", ""qty"": 6.0, ""total"": 8.94, ""unit_price"": 1.49}, {""description"": ""Yogurt"", ""qty"": 2.0, ""total"": 3.98, ""unit_price"": 1.99}, {""description"": ""Peanut Butter"", ""qty"": 1.0, ""total"": 3.99, ""unit_price"": 3.99}], ""payment_terms"": null, ""subtotal"": 25.88, ""tax"": 1.29, ""vendor"": ""QuickStop Market""}",,
+seed-52764504adce7059,"RECEIPT
+RECEIPT #: 2024-000987
+DATE: 2024-03-14
+VENDOR: KodeMentor S.A.
+ADDRESS: Calle Principal 123, San Luis Potosí, S.L.P., México
+CLIENT: NetFluent Technologies
+
+DESCRIPTION               HOURS     RATE        AMOUNT
+
+UI Design Review           10.0    MXN 3,000    MXN 30,000
+API Integration            15.0    MXN 2,500    MXN 37,500
+
+SUBTOTAL                           MXN 67,500
+IVA (16%)                          MXN 10,800
+GRAND TOTAL                        MXN 78,300
+
+Gracias por su confianza. Pago confirmado.
+www.kodementor.mx","{""currency"": ""MXN"", ""date"": ""2024-03-14"", ""grand_total"": 78300.0, ""line_items"": [{""description"": ""UI Design Review"", ""qty"": 10.0, ""total"": 30000.0, ""unit_price"": 3000.0}, {""description"": ""API Integration"", ""qty"": 15.0, ""total"": 37500.0, ""unit_price"": 2500.0}], ""payment_terms"": null, ""subtotal"": 67500.0, ""tax"": 10800.0, ""vendor"": ""KodeMentor S.A.""}",,
+seed-87624747ec3b677c,"Order Ref: 345678901 - 07 Jun 2024
+Customer: Priya Shah
+Address: 456 Mumbai Road, Mumbai, India
+
+Order Summary:
+Item Name             Qty   Price Per Unit   Total
+--------------------------------------------------
+Tablet 10''           1       ₹12,999        ₹12,999
+Tablet Case           1       ₹999           ₹999
+
+Subtotal: ₹13,998
+Discount (8%): -₹1,119.84
+
+Delivery Charges: ₹200
+
+Total: ₹13,078.16
+
+Order Confirmed by: E-Shop India
+Payment: Net Banking
+
+Estimated Shipment: 12 Jun 2024
+
+Thank you for choosing E-Shop India!","{""currency"": ""INR"", ""date"": ""2024-06-07"", ""grand_total"": 13078.16, ""line_items"": [{""description"": ""Tablet 10''"", ""qty"": 1.0, ""total"": 12999.0, ""unit_price"": 12999.0}, {""description"": ""Tablet Case"", ""qty"": 1.0, ""total"": 999.0, ""unit_price"": 999.0}], ""payment_terms"": null, ""subtotal"": 13998.0, ""tax"": 0.0, ""vendor"": ""E-Shop India""}",,
+seed-b75702ec6908449b,"Repair and Maintenance Invoice
+Bill No: 2024-00422
+Date: 22.04.2024
+Client: Mr. Li Wei
+Address: No. 234 Zhongshan Road, Shanghai, China
+
+Service Provider: AutoCare Shanghai
+Address: No. 58 Xizheng Road, Shanghai, China
+Phone: +86 21 1234 5678
+
+Description        Quantity  Unit Price (CNY)  Total (CNY)
+--------------------------------------------------------
+Engine Oil Change  1           ¥200.00          ¥200.00
+Spark Plug Replacement  4        ¥60.00           ¥240.00
+Tire Pressure Adjustment 1        ¥50.00           ¥50.00
+Labor for 2.5 Hours  2.5 hrs   ¥120.00/hour    ¥300.00
+
+Subtotal:                        ¥790.00
+VAT (13%)                         ¥102.70
+Total:                          ¥892.70
+
+Payment due on 05/05/2024. Thank you for your business.","{""currency"": ""CNY"", ""date"": ""2024-04-22"", ""grand_total"": 892.7, ""line_items"": [{""description"": ""Engine Oil Change"", ""qty"": 1.0, ""total"": 200.0, ""unit_price"": 200.0}, {""description"": ""Spark Plug Replacement"", ""qty"": 4.0, ""total"": 240.0, ""unit_price"": 60.0}, {""description"": ""Tire Pressure Adjustment"", ""qty"": 1.0, ""total"": 50.0, ""unit_price"": 50.0}, {""description"": ""Labor for 2.5 Hours"", ""qty"": 2.5, ""total"": 300.0, ""unit_price"": 120.0}], ""payment_terms"": ""Payment due on 05/05/2024"", ""subtotal"": 790.0, ""tax"": 102.7, ""vendor"": ""AutoCare Shanghai""}",,
+seed-bc32af7af3a5cfba,"INVOICE #INV-20240318-456
+
+From: Al-Khaleej General Trading
+Address: Al-Khaleej Business Park, Dubai, UAE
+Phone: +971 4 123 4567
+
+To: Al-Maktoum Contracting Co.
+Address: Al-Quoz Industrial Area, Dubai, UAE
+
+Date: 18-03-2024
+Due Date: 17-04-2024
+
+Description                    Quantity     Unit Price (AED)   Total (AED)
+-----------------------------------------------
+Steel Reinforcement Bars     150           25.75               3,862.50
+Concrete Pumps (1 day)       2             1,200.00            2,400.00
+Excavation Charge            1             3,500.00            3,500.00
+-----------------------------------------------
+Subtotal:                      9,762.50
+VAT 5%:                        488.13
+Grand Total:                  10,250.63
+
+Payment Terms: Net 60
+
+* This document may contain OCR inaccuracies. Please verify with our office.
+
+Al-Khaleej General Trading - All Rights Reserved","{""currency"": ""AED"", ""date"": ""2024-03-18"", ""grand_total"": 10250.63, ""line_items"": [{""description"": ""Steel Reinforcement Bars"", ""qty"": 150.0, ""total"": 3862.5, ""unit_price"": 25.75}, {""description"": ""Concrete Pumps (1 day)"", ""qty"": 2.0, ""total"": 2400.0, ""unit_price"": 1200.0}, {""description"": ""Excavation Charge"", ""qty"": 1.0, ""total"": 3500.0, ""unit_price"": 3500.0}], ""payment_terms"": ""Net 60"", ""subtotal"": 9762.5, ""tax"": 488.13, ""vendor"": ""Al-Khaleej General Trading""}",,

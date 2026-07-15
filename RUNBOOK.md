@@ -288,7 +288,76 @@ defaults (quality cells show `n/a`).
 
 ---
 
-## 9. Troubleshooting
+## 9. Human-gold slice (turnkey: recruit → rate → adjudicate → score)
+
+This is the executable version of the Phase 2 **F2 human-gold** lane. It turns
+the silver `reports/gold_predictions.jsonl` into a hand-rated, κ-anchored gold
+slice with **~10 minutes of human work per rater**. Everything here is
+pure-Python + stdlib (no GPU, no API).
+
+### 9.1 Build the rating sheet (active-learning sampler)
+
+```bash
+python scripts/gold_sample.py --n 24        # real slice: --n 150 (…to 200)
+```
+
+Picks the most *informative* pairs (low field-F1, schema-repair triggered,
+exact-match miss), stratified by currency, and writes:
+`data/gold/rating_sheet.csv` (blank `label`/`notes` columns) +
+`data/gold/rating_instructions.md` (the rubric, decision rule, worked examples)
++ `reports/gold_sample_predictions.jsonl` (per-id signals for the scorer).
+
+### 9.2 Recruit + rate (the only human step)
+
+Give **each of two raters** a copy of `rating_sheet.csv` and
+`rating_instructions.md`. They label **independently** — one word per row in
+`label` (`correct` / `incorrect`), a short reason in `notes` for `incorrect`.
+Save as `data/gold/rater_a.csv` and `data/gold/rater_b.csv`.
+
+### 9.3 Score inter-rater agreement + build the adjudication queue
+
+```bash
+python scripts/gold_kappa.py \
+    --rater-a data/gold/rater_a.csv --rater-b data/gold/rater_b.csv
+```
+
+Prints Cohen's κ (gate: **≥ 0.70**) + raw agreement, and writes the
+disagreements to `data/gold/disagreements.csv`. **If κ < 0.70**, tighten
+`rating_instructions.md` and re-rate before trusting any number.
+
+### 9.4 Adjudicate → final gold → the defensible number
+
+A third rater (or a consensus pass) fills the `adjudicated` column of
+`disagreements.csv`; merge the agreements + adjudicated calls into
+`data/gold/adjudicated.csv` (columns `id,label`). Then:
+
+```bash
+python scripts/gold_kappa.py \
+    --rater-a data/gold/rater_a.csv --rater-b data/gold/rater_b.csv \
+    --adjudicated data/gold/adjudicated.csv --json-out reports/gold_kappa.json
+```
+
+reports the **human-verified extraction accuracy** — the model-vs-human number
+that replaces the silver headline.
+
+### 9.5 Validate the whole loop NOW with a synthetic stand-in
+
+No humans yet? Exercise the pipeline end-to-end with two LLM stand-in raters
+(local Ollama `qwen3:14b`, two rubric phrasings/temperatures):
+
+```bash
+python scripts/gold_synthetic_raters.py --limit 20     # add --force-fallback if no Ollama
+```
+
+Writes `reports/gold_pipeline_demo.md` with the measured synthetic κ and the
+model-vs-synthetic-gold accuracy. **These are SYNTHETIC raters (LLM stand-ins)
+to validate the pipeline — NOT human gold;** replace with two human CSVs (§9.2)
+for the real κ ≥ 0.70 result. Falls back to a deterministic rule-based stand-in
+if Ollama is unreachable.
+
+---
+
+## 10. Troubleshooting
 
 - **`no kernel image is available for execution on the device`** — your torch
   wheel lacks `sm_120`; reinstall cu128 (§2.2) and re-run the verify snippet (§2.3).
