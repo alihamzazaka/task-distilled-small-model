@@ -1,0 +1,181 @@
+<h1 class="title">Frontier Quality at Tiny-Model Footprint: A Rigorous Cost/Quality Case Study of Task-Distilling Invoice Extraction into a 0.5B Local Student</h1>
+<div class="authors">Ali Hamza</div>
+<div class="affil">Independent Research · Built and evaluated on a single RTX 5080 (16 GB)</div>
+
+<div class="abstract"><b>Abstract—</b> Knowledge distillation into small task models is well-trodden; a disciplined, receipt-carrying <i>cost/quality case study</i> on one real task is not. We distill a 14B-class open teacher (<i>qwen3:14b</i>) into a 0.5B student (<i>Qwen2.5-0.5B-Instruct</i>) for structured invoice/receipt-to-JSON extraction, and measure the swap end to end: teacher-generated data, ruthless filtering, a full fine-tune on a single consumer GPU, and evaluation against a pre-committed quality bar on a held-out set the student never trained on. The student reaches a field-level F1 of <b>0.9647 — 96.5% of the teacher's reference score</b> — clearing the 95% bar committed in Phase 0, with a 100% schema-valid rate after a bounded constrained-repair loop (≈97% first pass) and 93.5% teacher-agreement on fresh inputs, in a footprint ~28× smaller than the teacher. We foreground three honest negatives that a top-venue empirical paper must not hide: (i) the headline gold set is <i>silver-grade</i> cross-model agreement (37 items), not human-verified — a 20-item pilot rating gives Cohen's κ = 0.60, below the κ ≥ 0.70 gate; (ii) with a <i>free local</i> teacher both models cost ≈$0/1k, so the signature dollar-cost arbitrage is <b>unproven</b> (student amortized cost $0.1178/1k); and (iii) exact-match is only 54.1% and one-command <i>ollama run</i> is blocked by a GGUF-converter bug. We contribute the cost model, the silver→gold protocol, and a categorized failure taxonomy as the reusable artifacts. Peer-reviewed acceptance depends on completing the gated paid-teacher and human-verification lanes.</div>
+
+<div class="keywords"><b>Index Terms—</b> knowledge distillation, structured extraction, small language models, LLMOps, cost modeling, silver-to-gold annotation, failure analysis, on-device inference</div>
+
+<h2>1. Introduction</h2>
+
+<p>Enterprises increasingly want a specific large-language-model (LLM) capability in production but cannot afford frontier API calls at scale, cannot send documents to third parties for privacy reasons, or need low, predictable latency. Per-request frontier cost quietly kills the unit economics of high-volume, narrow tasks. The standard remedy is <i>task distillation</i>: use an expensive general teacher to generate labeled data for one task, fine-tune a small student to imitate it, and deploy the student locally.</p>
+
+<p>The method itself is not new. Soft-label distillation [1], sequence-level distillation [2], distilled evaluators such as Prometheus [3][4] and JudgeLM [5], synthetic-data recipes such as Alpaca and Self-Instruct [6][7], and Distil-Whisper [8] all predate this work. Stating <i>"I distilled a model"</i> is therefore not a contribution. What remains genuinely rare is the <b>discipline around the claim</b>: a clean task definition, a held-out evaluation the student never trained on, a cost curve computed with amortized hardware rather than the "it's free locally" hand-wave, and an honest categorization of the residual gap. That rigor — not novelty — is the contribution of this paper.</p>
+
+<p>We instantiate the recipe on one narrow, high-value task: extracting a canonical JSON record (vendor, date, currency, line items, subtotal, tax, grand total, payment terms) from free-text invoices and receipts. We commit the metric and bar <i>before</i> generating any data (Phase 0): metric M is field-level F1 on a human-verified gold set, and the bar is student ≥ 0.95 × teacher. We then run the full loop on a single RTX 5080 (16 GB) and report what we measured — including where the honest story is weaker than the pitch.</p>
+
+<h3>1.1 Contributions</h3>
+
+<p>This paper contributes:</p>
+
+<p><b>(1) A measured parity result.</b> A 0.5B student reaches field-F1 0.9647 = 96.5% of a 14B-class teacher on invoice extraction, clearing a pre-committed 95% bar, at 100% schema-valid output and ~28× smaller footprint (Section 5).</p>
+
+<p><b>(2) An honest, amortized cost model.</b> A GPU-capex-plus-electricity cost model that yields $0.1178/1k requests for the local student — and, critically, exposes that a <i>free local</i> teacher makes the dollar-cost win unmeasurable, so we report it as gated rather than claimed (Sections 3.4, 6.2).</p>
+
+<p><b>(3) A silver→gold verification protocol.</b> A reproducible sample→rate→adjudicate→score pipeline with cross-model silver labeling and a Cohen's-κ inter-rater gate, plus a pilot κ that honestly falls below threshold, making the circularity of cross-model gold explicit (Sections 3.3, 6.3).</p>
+
+<p><b>(4) A categorized failure taxonomy.</b> A six-bucket taxonomy of the residual gap over 711 compared fields that doubles as a concrete teacher-escalation routing policy (Section 5.4).</p>
+
+<p>We deliberately foreground three corrected/negative findings (silver-not-gold, no dollar win, broken <i>ollama run</i>) as first-class results, because in an empirical cost/quality study the honesty <i>is</i> the artifact.</p>
+
+<h2>2. Related Work</h2>
+
+<p><b>Distillation signal.</b> Hinton et al. [1] introduced soft-label distillation (KL divergence on a teacher's softened output distribution), which requires access to teacher logits and hence an open-weights teacher. Kim and Rush [2] moved distillation to the sequence level, training a student on the teacher's <i>output sequences</i> rather than per-token distributions — the conceptual basis for training on teacher text with optional rationales. Because frontier teachers are typically API-only and do not expose logits, we use hard-label / sequence-level distillation; our teacher is open-weights, so soft-label KD is available as future work but was not needed to clear the bar.</p>
+
+<p><b>Task-specific distillation precedents.</b> Prometheus and Prometheus 2 [3][4] and JudgeLM [5] distill a stronger judge into smaller open evaluators, demonstrating that a bounded capability transfers into a smaller model. Distil-Whisper [8] is a clean example of a smaller model matching a larger one on a bounded task (ASR) via large-scale pseudo-labeling. Alpaca, Vicuna, and Self-Instruct [6][7] established the synthetic-data / hard-label signal we adopt: fine-tune a base model on a stronger model's generated input/output pairs. None of these publishes, for a single client-shaped task, the combination we target — a leak-free held-out eval, an amortized cost curve, and a categorized residual-gap analysis.</p>
+
+<p><b>Efficient single-GPU fine-tuning.</b> LoRA [11] and QLoRA [10] make ≤7–8B fine-tuning feasible on one consumer GPU; TRL's <i>SFTTrainer</i> [12] and Unsloth [13] provide the training scaffolding. For a 0.5B student a full fine-tune fits 16 GB comfortably, so we use full FT (all weights updated) rather than adapters. Serving uses llama.cpp/Ollama [14][15] for local quantized inference. Inter-rater agreement uses Cohen's κ [16].</p>
+
+<p>Our position relative to all of the above is explicit and modest: we reuse their methods wholesale and contribute the <i>measurement discipline</i> around one deployment.</p>
+
+<h2>3. Method / System Design</h2>
+
+<p>The system is a closed, gated loop (Figure 1): a task definition drives teacher generation; outputs are quality-filtered into a distillation dataset; a small student is fine-tuned; an eval harness measures quality, teacher-agreement, cost, and latency; and a quality gate either loops back for more data or forwards to packaging. A separate gold test set feeds only the eval and is never trained on.</p>
+
+<div class="fig"><img src="figures/fig1_pipeline.png" style="width:15cm;"><div class="cap">Figure 1. The teacher → filter → student → measured-eval loop, gated on a pre-committed quality bar. The silver gold set is firewalled from training and feeds evaluation only. Node annotations are the as-built counts (800 seeds; 568/78/53 train/dev/test).</div></div>
+
+<h3>3.1 Task, schema, and metric (Phase 0, locked)</h3>
+
+<p>The task is invoice/receipt text → a canonical JSON schema validated by <i>pydantic</i>, with money/date/currency normalization. Metric M is field-level F1 computed on flattened leaf fields with a money tolerance of $0.01, chosen because partial credit is meaningful for multi-field extraction (a document with one wrong field should not score zero). The bar — student ≥ 0.95 × teacher on M — and the schema were committed before any data was generated, so the eval cannot be retrofitted to the result.</p>
+
+<h3>3.2 Teacher generation and filtering</h3>
+
+<p>The teacher <i>qwen3:14b</i> (served locally via Ollama, <i>think:false</i>) generates diverse synthetic invoices and then labels every seed with a deterministic pass (temperature 0.0) plus a second higher-temperature pass (0.7) for a self-consistency check. Filtering is a three-gate funnel: (i) schema validation drops malformed outputs; (ii) a consistency gate keeps only items whose two teacher passes agree at ≥ 0.85 field-level agreement; and (iii) Jaccard/embedding dedup at 0.90 similarity removes near-duplicates. On the as-built run of 800 seeds, 11 items were dropped by the consistency gate, 0 by schema, and 0 by dedup, with 0 cross-split leaks (Section 4).</p>
+
+<h3>3.3 Silver→gold verification protocol</h3>
+
+<p>The SPEC requires a <i>human-verified</i> gold set. Because human raters were not yet available, we ship a two-tier protocol. The <b>silver</b> tier scores only the gold items on which an <i>independent</i> second model (qwen2.5-coder:32b) agrees with the teacher's label — cross-model agreement removes the teacher-vs-itself circularity but is not human ground truth; 37 of the 60 gold-template items pass this gate. The <b>gold</b> tier is an executable sample→rate→adjudicate→score loop: an active-learning sampler selects the most informative pairs, two independent raters label them, Cohen's κ [16] gates inter-rater reliability at ≥ 0.70, and disagreements are adjudicated before the final human-verified accuracy is computed. We report the silver number as the headline and the gold protocol's pilot output as an honest negative (Section 6.3).</p>
+
+<h3>3.4 Cost model (amortized, not "free")</h3>
+
+<p>The student's cost is modeled as GPU capex plus electricity, not zero. With an RTX 5080 at $1,100 amortized over 3 years, 360 W board power at $0.15/kWh, and the measured throughput of 0.226 req/s, the student costs $0.1178 per 1,000 requests. The teacher's per-request profile (≈900 input / 350 output tokens) is priced against a provider table; with the free local teacher its price is $0.00/1k, which — honestly — makes the cost multiple and break-even volume undefined. The plumbing (a per-model price table, disk cache, cost tracker, and break-even solver) is built and unit-tested; it simply has never been pointed at a billed API.</p>
+
+<h3>3.5 Constrained-output serving</h3>
+
+<p>A small student occasionally emits malformed JSON. The serving path (<i>generate → parse → validate → retry</i>, ≤ 3 attempts) repairs format slips so downstream systems receive either valid JSON or a structured error, never a crash. This lifts the schema-valid rate from ≈97% first-pass to 100% after repair.</p>
+
+<h2>4. Experimental Setup</h2>
+
+<p><b>Hardware.</b> All training, evaluation, and serving run on a single NVIDIA RTX 5080 (16 GB, Blackwell / sm_120). The 0.5B full fine-tune fits 16 GB comfortably; the SPEC's 1–3B band was not reached because the 3B base download was unreliable on the build link — an as-built substitution documented as a limitation, not hidden.</p>
+
+<p><b>Data.</b> The as-built run generated and labeled 800 seeds, all 800 schema-valid at the teacher (teacher labeling logged 1,000 billed calls with 600 cache hits, 2,541,708 input and 181,810 output tokens). After the consistency gate (11 dropped) the corpus was split into train 568 / dev 78 / test 53, with 60 items carved for the gold template and 30 held out as a fresh teacher-agreement pool. Dedup and cross-split leak checks returned 0.</p>
+
+<p><b>Student and training.</b> The student is <i>Qwen/Qwen2.5-0.5B-Instruct</i>, full fine-tuned for 3 epochs (per-device batch 8 × gradient accumulation 4 = effective batch 32, learning rate 2e-5, warmup ratio 0.03, weight decay 0.01, bf16, gradient checkpointing, max sequence length 2048), via TRL's <i>SFTTrainer</i> [12] with an Unsloth [13] fast path.</p>
+
+<p><b>Metrics.</b> Field-F1 (macro and micro), field precision/recall, exact-match, and schema-valid rate on the gold set; teacher-agreement on the fresh pool; latency p50/p95 and throughput; and the amortized cost model. The full pure-Python core (schema, metrics, filtering, cost model) is covered by 118 passing unit tests.</p>
+
+<p><b>Baseline.</b> The teacher is the reference baseline: its quality on M is defined as 1.0 (the ceiling), and the student is judged as a fraction of the teacher, not on an absolute leaderboard.</p>
+
+<h2>5. Results</h2>
+
+<h3>5.1 Quality: the student clears the bar</h3>
+
+<p>On the 37-item silver gold set the student reaches field-F1 <b>0.9647</b> (micro 0.9676; precision 0.9619, recall 0.9685), which is <b>96.5% of the teacher's reference 1.0</b> and clears the pre-committed 0.95 bar (<i>meets_bar = true</i>). Figure 2 places the result against the bar. Teacher-agreement on the fresh 30-item pool is 0.9352, indicating the student behaves like the teacher off the gold set rather than merely memorizing it.</p>
+
+<div class="fig"><img src="figures/fig2_headline_f1.png" style="width:11cm;"><div class="cap">Figure 2. Headline result. The distilled 0.5B student reaches 96.5% of the teacher's field-F1, above the 95% bar committed in Phase 0. Values from reports/eval_report.json.</div></div>
+
+<div class="tablecap">Table 1. Quality metrics on the 37-item silver gold set (reports/eval_report.json).</div>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Note</th></tr>
+<tr><td>Field-F1 (macro)</td><td>0.9647</td><td>96.5% of teacher; meets bar</td></tr>
+<tr><td>Field-F1 (micro)</td><td>0.9676</td><td>—</td></tr>
+<tr><td>Field precision</td><td>0.9619</td><td>—</td></tr>
+<tr><td>Field recall</td><td>0.9685</td><td>—</td></tr>
+<tr><td>Exact-match</td><td>0.5405</td><td>strictest, whole-doc view</td></tr>
+<tr><td>Schema-valid rate</td><td>1.0000</td><td>after ≤3-attempt repair (~97% first pass)</td></tr>
+<tr><td>Teacher-agreement</td><td>0.9352</td><td>fresh 30-item pool</td></tr>
+</table>
+
+<h3>5.2 Footprint and the honest cost picture</h3>
+
+<p>The student is a ~0.5B model versus a 14B-class teacher — roughly <b>28× smaller</b> (Figure 4, left). This is the real, measured win: a tiny student packs alongside other workloads and keeps every document on the box. The cost picture (Figure 4, right) is where we are deliberately honest: the amortized student cost is $0.1178/1k, but the free local teacher costs $0.00/1k, so there is no dollar arbitrage to report and the break-even volume is undefined.</p>
+
+<div class="fig"><img src="figures/fig4_footprint_cost.png" style="width:15cm;"><div class="cap">Figure 4. Left: ~28× parameter-footprint reduction (log scale). Right: the amortized $/1k cost model runs, but with a free local teacher the dollar-cost thesis is unproven — reported as gated, not claimed. Values from reports/money_table.md and reports/eval_report.json.</div></div>
+
+<div class="tablecap">Table 2. The money table: teacher vs distilled student (reports/money_table.md, reports/eval_report.json).</div>
+<table>
+<tr><th>Axis</th><th>Teacher (qwen3:14b)</th><th>Student (0.5B)</th><th>Win</th></tr>
+<tr><td>Footprint</td><td>14B-class</td><td>~0.5B</td><td>~28× smaller</td></tr>
+<tr><td>Quality (field-F1)</td><td>1.0000 (ref)</td><td>0.9647</td><td>96.5%, meets bar</td></tr>
+<tr><td>Schema-valid</td><td>—</td><td>100% (post-repair)</td><td>robustness</td></tr>
+<tr><td>Exact-match</td><td>—</td><td>54.1%</td><td>strictest view</td></tr>
+<tr><td>p95 latency</td><td>14B forward</td><td>5,921 ms</td><td>smaller footprint</td></tr>
+<tr><td>Data egress</td><td>stays local</td><td>stays local</td><td>on-prem / private</td></tr>
+<tr><td>$/1k (amortized)</td><td>$0.0000</td><td>$0.1178</td><td>both ~free locally</td></tr>
+</table>
+
+<h3>5.3 Latency</h3>
+
+<p>Measured on the RTX 5080, the student's per-request latency is p50 4.037 s and p95 5.921 s at 0.226 req/s throughput. We note plainly that this is <i>not</i> a latency win over a hosted frontier API in the usual "180 ms vs 2.1 s" sense; both models here run locally, and the 0.5B student's wall-clock is dominated by the constrained-decode serving path rather than network round-trips. The latency story becomes a genuine win only against a networked paid teacher — again, gated on the paid-API lane.</p>
+
+<h3>5.4 Failure taxonomy</h3>
+
+<p>Across the 37 gold documents, 20 are fully correct and 25 field errors occur over 711 compared fields — a 3.5% field error rate. Figure 3 categorizes the residual gap into six buckets. Text-normalization drift dominates (<i>wrong_text</i>, 44%: vendor/description spacing and punctuation, e.g. "WebCrafters Ltd." vs "WebCrafters Ltd"), followed by <i>hallucinated_line_item</i> (16%: headers/totals read as items on noisy inputs) and <i>wrong_money</i> (16%: tax/subtotal confusion or OCR-like digit slips). The tail is <i>hallucinated_field</i>, <i>missing_field</i>, and <i>wrong_date</i> (8% each). Per-field, <i>description</i>, <i>vendor</i>, and <i>payment_terms</i> account for five errors each.</p>
+
+<div class="fig"><img src="figures/fig3_failure_taxonomy.png" style="width:12cm;"><div class="cap">Figure 3. Categorized residual-gap taxonomy over 711 compared fields (25 errors, 3.5%). Text-normalization drift is the dominant failure mode. Values from reports/failure_analysis.md.</div></div>
+
+<p>The taxonomy doubles as an escalation policy: keep the student for short/medium invoices where it is at or near teacher parity, and route to the teacher when (a) the line-item count is unusually high, (b) the cheap arithmetic check <i>grand_total ≈ Σ line totals + tax</i> fails on the student's output, or (c) required scalars return null. Each rule maps to a measured bucket rather than a vibe.</p>
+
+<h2>6. Discussion</h2>
+
+<h3>6.1 What the parity number does and does not say</h3>
+
+<p>The 96.5% field-F1 is real and clears the committed bar, but the field-F1/exact-match gap is the more instructive figure. Exact-match — every field correct in a document — is only 54.1%. A single spacing difference in a vendor name fails exact-match while barely moving field-F1. For downstream consumers that require whole-record correctness, 54.1% is the honest headline; for consumers that tolerate per-field partial credit and a cheap validation pass, 96.5% is. Reporting both, rather than the flattering one alone, is the point.</p>
+
+<h3>6.2 The dollar-cost thesis is unproven (corrected finding)</h3>
+
+<p>The project's reason for being is "frontier quality at a fraction of the cost." With a free local teacher, that claim is <b>not demonstrated</b>: both models run on the same GPU at ≈$0/1k, so the cost multiple is 0 and break-even is undefined. We refuse to dress this up. The measured wins here are <i>footprint</i> (28×) and <i>privacy</i> (nothing leaves the box), which are real but are not the signature dollar win. Proving the dollar win requires pointing the (already-built, already-tested) cost machinery at a paid frontier teacher and re-running Phase 1→3 — a gated lane, not a completed result.</p>
+
+<h3>6.3 Silver, not gold (corrected finding)</h3>
+
+<p>The headline field-F1 is measured on a <i>silver</i> set: 37 items where a second model agreed with the teacher. Cross-model agreement is stronger than teacher-vs-itself but is still not human ground truth, and it can systematically miss errors both models share. Our pilot of the human-rating loop is sobering: on a 20-item slice, two rater configurations reach Cohen's κ = 0.60 with 80% raw agreement — <i>below</i> the κ ≥ 0.70 reliability gate — and the model-vs-human accuracy on that adversarially-sampled slice is 55%. A synthetic-rater dry run of the full loop similarly lands at κ = 0.6364 and 56.2% model-vs-gold. These numbers are deliberately drawn from the hardest, most informative pairs (the active-learning sampler over-weights low-F1, repair-triggered, exact-match-miss cases), so they are a conservative floor rather than the representative headline — but they make plain that the rubric needs tightening and real human raters are required before the parity number can be called gold.</p>
+
+<h3>6.4 Packaging: local run works, ollama run does not (corrected finding)</h3>
+
+<p>The "runs locally" deliverable is satisfied through the project's own harness: <i>serve/infer.py --model models/student-merged</i> produces correct, schema-valid JSON in one command. The separate <i>ollama run</i> target is blocked: Ollama's built-in safetensors→GGUF converter mis-maps this checkpoint's tensors (0.21.0 crashes in the sampler; 0.31.2 loads but emits a constant token, even with untied embeddings), while the identical checkpoint yields perfect JSON through <i>transformers</i> on the same machine — isolating the fault to the converter. The reliable route is a canonical GGUF from llama.cpp's maintained <i>convert_hf_to_gguf.py</i> [15], left as a one-command recipe pending an explicit approval to clone the external tool.</p>
+
+<h2>7. Limitations &amp; Ethical Considerations</h2>
+
+<p><b>Gated for peer review.</b> Three items must be completed before this work is defensible at a peer-reviewed venue, and we state plainly that acceptance depends on them: (1) <i>Paid-teacher cost proof</i> — the dollar-cost win and break-even volume are unmeasured with a free local teacher; a billed frontier API must be priced in. (2) <i>Human-verified gold</i> — the headline is silver-grade cross-model agreement; a human-rated set with κ ≥ 0.70 must replace it, and our pilot κ = 0.60 shows the rubric is not yet there. (3) <i>Student scale and packaging</i> — the student is 0.5B, below the SPEC's 1–3B band (a download-reliability substitution), exact-match is a low 54.1%, and a valid GGUF for <i>ollama run</i> has not been produced.</p>
+
+<p><b>Scope.</b> Results are for one document type, one language-normalization regime, and a modest 800-seed corpus; generalization to other invoice locales, longer documents, and adversarial inputs is untested. The gold set is small (37 scored items), so confidence intervals on the field-F1 are wide and not yet reported.</p>
+
+<p><b>Ethics and terms.</b> The teacher outputs are used to train a task-specific internal tool; when distilling from a paid provider, the provider's terms on training competing models must be reviewed and documented. Keeping documents on-box is a privacy benefit but does not remove the operator's obligation to secure sensitive financial data at rest. No human-subjects data was used; the corpus is synthetic.</p>
+
+<h2>8. Conclusion &amp; Future Work</h2>
+
+<p>We presented a rigorous, receipt-carrying case study of task-distilling invoice extraction from a 14B-class teacher into a 0.5B local student. The student clears the pre-committed 95% quality bar at 96.5% field-F1 with 100% schema-valid output and ~28× smaller footprint, and we ship a cost model, a silver→gold verification protocol, and a categorized failure taxonomy as the reusable artifacts. We foreground the corrected findings — no dollar-cost win with a free local teacher, a silver (κ = 0.60 pilot) rather than human-verified gold set, 54.1% exact-match, and a broken <i>ollama run</i> — as first-class results, because in a cost/quality study the honesty is the contribution. Future work is the four gated lanes: distill from a paid frontier teacher to measure the real $/1k win and break-even volume; recruit human raters to lift the gold set above κ ≥ 0.70; scale the student into the 1–3B band with a capacity-vs-data ablation to close the exact-match gap; and produce a valid llama.cpp GGUF for a real one-command run.</p>
+
+<h2>References</h2>
+<div class="refs">
+[1] G. Hinton, O. Vinyals, and J. Dean. Distilling the Knowledge in a Neural Network. NIPS Deep Learning Workshop, 2015.<br>
+[2] Y. Kim and A. M. Rush. Sequence-Level Knowledge Distillation. EMNLP, 2016.<br>
+[3] S. Kim et al. Prometheus: Inducing Fine-grained Evaluation Capability in Language Models. ICLR, 2024.<br>
+[4] S. Kim et al. Prometheus 2: An Open Source Language Model Specialized in Evaluating Other Language Models. EMNLP, 2024.<br>
+[5] L. Zhu et al. JudgeLM: Fine-tuned Large Language Models are Scalable Judges. arXiv:2310.17631, 2023.<br>
+[6] R. Taori et al. Stanford Alpaca: An Instruction-following LLaMA Model. Stanford CRFM, 2023.<br>
+[7] Y. Wang et al. Self-Instruct: Aligning Language Models with Self-Generated Instructions. ACL, 2023.<br>
+[8] S. Gandhi, P. von Platen, and A. M. Rush. Distil-Whisper: Robust Knowledge Distillation via Large-Scale Pseudo Labelling. arXiv:2311.00430, 2023.<br>
+[9] Qwen Team. Qwen2.5 Technical Report. arXiv:2412.15115, 2024.<br>
+[10] T. Dettmers, A. Pagnoni, A. Holtzman, and L. Zettlemoyer. QLoRA: Efficient Finetuning of Quantized LLMs. NeurIPS, 2023.<br>
+[11] E. J. Hu et al. LoRA: Low-Rank Adaptation of Large Language Models. ICLR, 2022.<br>
+[12] L. von Werra et al. TRL: Transformer Reinforcement Learning. github.com/huggingface/trl, 2020–.<br>
+[13] Unsloth AI. Unsloth: Efficient LLM Fine-tuning. github.com/unslothai/unsloth.<br>
+[14] Ollama. github.com/ollama/ollama.<br>
+[15] G. Gerganov et al. llama.cpp. github.com/ggml-org/llama.cpp.<br>
+[16] J. Cohen. A Coefficient of Agreement for Nominal Scales. Educational and Psychological Measurement, 20(1):37–46, 1960.
+</div>
+
+<h2>Appendix A. Reproducibility</h2>
+<p><b>Config (configs/default.yaml).</b> Teacher <i>qwen3:14b</i> via Ollama (provider local_openai, temperature 0.0, consistency 0.7, max_tokens 2048). Filtering: dedup threshold 0.90, consistency threshold 0.85, money tolerance $0.01. Splits seed 20260707. Student <i>Qwen/Qwen2.5-0.5B-Instruct</i>, full FT, 3 epochs, batch 8 × grad-accum 4, lr 2e-5, warmup 0.03, weight decay 0.01, bf16, gradient checkpointing, max_seq 2048. Inference: max_new_tokens 1024, ≤3 repair retries. Cost: GPU $1,100 / 3 yr, 360 W, $0.15/kWh, measured throughput 0.226 req/s.</p>
+<p><b>Artifacts.</b> reports/eval_report.json (quality, agreement, latency, cost), reports/money_table.md, reports/failure_analysis.md, reports/filtering_report.json, reports/cost_teacher_labeling.json, reports/gold_kappa_demo.json, reports/gold_pipeline_demo.md. Regenerate figures with paper/make_figures.py. Pure-Python core validated by 118 passing unit tests.</p>
